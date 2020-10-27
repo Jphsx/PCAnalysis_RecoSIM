@@ -21,3 +21,18 @@ For different datatier/tree types I will make different templates and replace re
 
 to build type
 make -f recosim.mk
+
+to setup root locally 
+. setenv.sh
+
+
+to launch a job test or full job set
+sbatch job_test.sh
+sbatch job_launch.sh
+
+to run jobs locally (interactive without submission)
+./job_test.sh
+./local_test.sh
+
+
+REMEMBER TO CHANGE EMAIL NOTIFICATION SETTINGS IN JOB LAUNCH SCRIPTS
