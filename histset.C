@@ -134,8 +134,11 @@ void histset::AnalyzeEntry(recosim& s){
 
 	}
 	
-		
-
+ 	//disambiguation
+ 	//get cut mask (check numerator cuts)
+	std::vector<bool> cutmask = GetCutMask(s);
+	hgn_pc HGN = pc_disambiguation(s,cutmask);
+	FillTH1( id_numHGNPCHist, HGN.vsel.size(), w);
 
 
 }  // End of sub-program

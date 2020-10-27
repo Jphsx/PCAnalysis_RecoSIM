@@ -6,6 +6,7 @@
 		id_numpcHist,
 		id_numSPCHist,
 		id_ptSPCHist,
+                id_numHGNPCHist,
             numTH1Hist};
        
 	enum th2d_ids{

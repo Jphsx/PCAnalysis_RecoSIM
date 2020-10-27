@@ -2,3 +2,4 @@
 compiledThreads
 *.o
 *.swp
+*.log
