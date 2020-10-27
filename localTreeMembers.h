@@ -81,3 +81,9 @@
     auto& PC_vTrack1_nBefore = s.Conv_nHitsBeforeVtx_Tk1;
     auto& PC_nSharedHits = s.Conv_nSharedHits;
 
+    auto& SimVtx_processType = s.SimVtx_processType;
+    auto& SimTrk_simvtx_Idx = s.SimTrk_simvtx_Idx;
+    auto& SimVtx_simtrk_parent_tid = s.SimVtx_simtrk_parent_tid;
+    auto& SimTrk_trackId = s.SimTrk_trackId;
+    auto& SimTrk_pt = s.SimTrk_pt;
+

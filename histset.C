@@ -7,7 +7,7 @@
 #include "TTreeReader.h"
 #include "TTreeReaderValue.h"
 #include "recosim.C"
-
+#include "PCTools.h"
 #include "Math/Vector3D.h"
 #include "Math/Vector4D.h"
 #include <map>
@@ -120,7 +120,19 @@ void histset::AnalyzeEntry(recosim& s){
 		FillTH2(id_rphiHist,PC_r, PC_phi,w);
 	}
 
-	
+	//get sim pc mask
+	sim_pc SPC;
+	SPC = GetSimPC(s);
+
+	int np14 = SPC.p14_key.size();
+	FillTH1(id_numSPCHist, np14, w);
+	//loop over sim
+	int gidx;
+	for(int i=0; i<np14; i++ ){
+		gidx = SPC.p14_key[i];
+		FillTH1(id_ptSPCHist,SimTrk_pt[gidx], w);	
+
+	}
 	
 		
 

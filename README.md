@@ -18,3 +18,6 @@ The work flow should be as follows--
 
 
 For different datatier/tree types I will make different templates and replace recosim.C/h
+
+to build type
+make -f recosim.mk
