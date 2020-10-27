@@ -1,0 +1,4 @@
+*.root
+compiledThreads
+*.o
+*.swp
