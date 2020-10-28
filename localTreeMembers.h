@@ -57,7 +57,7 @@
     auto& PC_zPV = s.Conv_zOfPrimaryVertexFromTracks;
 
 //    auto isRealData = *(s.isRealData);
-    bool isRealData = true;
+//    bool isRealData = true;
 
     auto lumiSection = *(s.luminosityBlock);
 //    auto& mcpu = s.MC_PUInfo_numberOfInteractions; 

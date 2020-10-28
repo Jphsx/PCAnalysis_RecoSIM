@@ -1,20 +1,8 @@
 #include <iomanip>
 #include "Hungarian.h"
 #include "TMath.h"
+#include <set>
 
-//(0) create cutmask
-//
-std::vector<bool> GetCutMask(recosim& s){
-
-  auto& PC_x = s.Conv_vtx_X;
-  std::vector<bool> cutmask(PC_x.GetSize());
-  for(int i=0; i<cutmask.size(); i++){
-		cutmask[i] = true;
-   }
-  return cutmask;	
-// rerr < RERRCUT && abs(z) < ZCUT && abs(cos(theta)) < COSTCUT
- //              && fitprob > FITPROBCUT && std::max(nBefore0,nBefore1)==0 
-}
 //////////////////////////////////////////////////////////////
 //
 //(1) hungarian disambiguation
@@ -30,7 +18,7 @@ struct hgn_pc{
 };
 hgn_pc pc_disambiguation(recosim& s, std::vector<bool> cutmask){
 
-    const bool lpr = true;       // print flag
+    const bool lpr = false;       // print flag
     const bool lreduce = true;   // do problem reduction
     const bool lassign = true;   // Do assignment problem
 
@@ -416,3 +404,296 @@ sim_pc GetSimPC(recosim& s){
 	return SPC;
 
 }
+
+////////////////////////////////////////////////////////////////////
+//
+//(3) calculation of common variables PER conversion
+//
+struct CommonVars{
+	
+    double radius;
+    double rerr;
+    double pfit;
+    double phierr;
+    double zerr;
+    double rps;
+    double rnominal;
+    double phi;
+    double rho;
+    double pt;
+    double E;
+    double phip;
+    double xplus;
+    double theta;
+    double etaphys;
+    double x;
+    double y;
+    double z;
+    int id;
+
+    //track 0and1 params swim from inner vtx to pc vtx
+    double q0;
+    double q1;
+    double px0p;
+    double py0p;
+    double pz0p;
+    double x0p; 
+    double y0p; 
+    double z0p; 
+
+    double px1p;
+    double py1p;
+    double pz1p;
+    double x1p;
+    double y1p;
+    double z1p;    
+	
+};
+struct GlobalValues{
+    const double RERRCUT = 0.25;
+    const double COSTCUT = 0.85;
+    const double ZCUT = 25.0;
+    const double FITPROBCUT = 0.010;
+    const double MASSCUT = 0.15;
+
+    const double MASS_ELECTRON = 0.5109989461e-3;
+    const double MASS_PION = 139.57061e-3;
+    const double MASS_KAON = 493.677e-3;
+    const double MASS_PROTON = 938.272081e-3;
+
+    // We now have various "centers" to compare to for radial coordinates.
+// beam pipe displacement (in cm) from Anna's DPF2019 talk
+    const double x0bpdata =  0.171;
+    const double y0bpdata = -0.176;
+    const double x0bpmc = 0.0;
+    const double y0bpmc = 0.0;
+
+    //BPIX center displacement (in cm) (Anna's 16-Dec-2019 talk page 3)
+    const double x0data =  0.086;
+    const double y0data = -0.102;
+    const double x0mc = 0.0;
+    const double y0mc = 0.0;
+
+    //Pixel support displacement (in cm) (Anna's December talk page 4)
+    const double x0psdata = -0.080;
+    const double y0psdata = -0.318;
+    const double x0psmc = 0.0;
+    const double y0psmc = 0.0;
+
+};
+//////////////////GLOBAL DECLARATION OF CUTS AND OTHER CONST VALUES////////
+GlobalValues GV;
+/////////////////////////////////////////////////////////////////////////
+
+std::vector<CommonVars> GetCommonVars(recosim& s, bool isRealData){//pass in bool for mc or data, this isn't stored in tree, keep track manually in histset analysis
+
+
+    auto numberOfPC = *(s.nConv);  
+    auto& PC_x = s.Conv_vtx_X;
+    auto& PC_y = s.Conv_vtx_Y;
+    auto& PC_z = s.Conv_vtx_Z;
+    auto& PC_vtx_chi2 = s.Conv_vtx_chi2;
+    auto& PC_Px = s.Conv_refittedPair4Momentum_Px;
+    auto& PC_Py = s.Conv_refittedPair4Momentum_Py;
+    auto& PC_Pz = s.Conv_refittedPair4Momentum_Pz;
+    auto& PC_E = s.Conv_refittedPair4Momentum_E;
+    auto& PC_vtx_sigmaxx = s.Conv_vtx_cov_00;
+    auto& PC_vtx_sigmaxy = s.Conv_vtx_cov_01;
+    auto& PC_vtx_sigmayy = s.Conv_vtx_cov_11;
+    auto& PC_vtx_sigmazz = s.Conv_vtx_cov_22;
+
+    std::vector<CommonVars> pc_comm(numberOfPC);
+
+    double x0bp,y0bp,x0,y0,x0ps,y0ps;
+    if(isRealData){
+       x0bp = GV.x0bpdata;
+       y0bp = GV.y0bpdata;
+       x0 = GV.x0data;
+       y0 = GV.y0data;
+       x0ps = GV.x0psdata;
+       y0ps = GV.y0psdata;
+    }
+    else{// MC  
+       x0bp = GV.x0bpmc;
+       y0bp = GV.y0bpmc;
+       x0 = GV.x0mc;
+       y0 = GV.y0mc;
+       x0ps = GV.x0psmc;
+       y0ps = GV.y0psmc;
+    }
+    double x,y,z,pt,pz,E,r;	
+    double vxx, vxy, vyy, vzz;
+    double phi,theta,eta,rho,phip,rps,rnominal;
+    double cphi,sphi,varsum_r,varsum_phi, rerr,phierr,zerr,fitprob;
+
+    double pt0,tanl0,phi0,qR0,px0p,py0p,pz0p,x0p,y0p,z0p,q0;
+    double pt1,tanl1,phi1,qR1,px1p,py1p,pz1p,x1p,y1p,z1p,q1;
+    for(int i=0; i<numberOfPC; i++){	
+	CommonVars CVi;
+	x=PC_x[i];
+	y=PC_y[i];
+	z=PC_z[i];
+	pt = sqrt(PC_Px[i]*PC_Px[i] + PC_Py[i]*PC_Py[i]);
+	pz = PC_Pz[i];
+   	r = sqrt( (x-x0)*(x-x0) + (y-y0)*(y-y0) );
+  	E = PC_E[i];
+        vxx = PC_vtx_sigmaxx[i];
+        vxy = PC_vtx_sigmaxy[i];
+        vyy = PC_vtx_sigmayy[i];
+        vzz = PC_vtx_sigmazz[i];	
+   
+	phi = atan2(y-y0, x-x0);
+        theta = atan2(pt,pz);
+        eta = -log(tan(theta/2.0));
+        rho  =  sqrt( (x-x0bp)*(x-x0bp) + (y-y0bp)*(y-y0bp)) ;
+        phip =  atan2(y-y0bp, x-x0bp);
+        rps = sqrt( (x-x0ps)*(x-x0ps) + (y-y0ps)*(y-y0ps) );
+        rnominal = sqrt( x*x + y*y );
+        vxx = PC_vtx_sigmaxx[i];
+        vxy = PC_vtx_sigmaxy[i];
+        vyy = PC_vtx_sigmayy[i];
+        vzz = PC_vtx_sigmazz[i];
+        cphi = cos(phi);
+        sphi = sin(phi);
+	// This is the correct one
+        varsum_r   = cphi*cphi*vxx + 2.0*sphi*cphi*vxy + sphi*sphi*vyy;
+        varsum_phi = sphi*sphi*vxx - 2.0*sphi*cphi*vxy + cphi*cphi*vyy;
+        rerr = sqrt(varsum_r);
+        phierr = sqrt(varsum_phi)/r;
+        zerr = sqrt(vzz);
+        fitprob = TMath::Prob(PC_vtx_chi2[i], 3);
+	
+	CVi.radius = r;
+	CVi.rerr= rerr;
+	CVi.pfit = fitprob;
+	CVi.phierr = phierr;
+	CVi.zerr = zerr;	
+        CVi.rps= rps;
+	CVi.rho= rho;
+	CVi.phip = phip;
+	CVi.rnominal = rnominal;
+	CVi.phi = phi;
+	CVi.pt = pt;
+	CVi.E = E;
+	CVi.etaphys = eta;
+	CVi.id = i;
+	CVi.x = x;
+	CVi.y = y;
+	CVi.z = z;
+
+        auto& Tk0_px = s.Conv_tracksPin_Px_Tk0;
+    	auto& Tk0_py = s.Conv_tracksPin_Py_Tk0;
+    	auto& Tk0_pz = s.Conv_tracksPin_Pz_Tk0;
+    	auto& Tk0_x  = s.Conv_tracksInnerPosition_X_Tk0;
+    	auto& Tk0_y  = s.Conv_tracksInnerPosition_Y_Tk0;
+    	auto& Tk0_z  = s.Conv_tracksInnerPosition_Z_Tk0;
+
+    	auto& Tk1_px = s.Conv_tracksPin_Px_Tk1;
+    	auto& Tk1_py = s.Conv_tracksPin_Py_Tk1;
+    	auto& Tk1_pz = s.Conv_tracksPin_Pz_Tk1;
+    	auto& Tk1_x  = s.Conv_tracksInnerPosition_X_Tk1;
+    	auto& Tk1_y  = s.Conv_tracksInnerPosition_Y_Tk1;
+    	auto& Tk1_z  = s.Conv_tracksInnerPosition_Z_Tk1;
+
+        auto& PC_vTrack0_charge = s.Conv_Tk0_charge;
+    	auto& PC_vTrack1_charge = s.Conv_Tk1_charge;
+
+	//// Swim each track from inner hit to the conversion vertex - see convsel.C code
+        pt0 = sqrt(Tk0_px[i]*Tk0_px[i] + Tk0_py[i]*Tk0_py[i]);
+        tanl0 = Tk0_pz[i]/pt0;
+        phi0 = atan2(Tk0_py[i],Tk0_px[i]);
+        qR0 = double(PC_vTrack0_charge[i])*100.0*pt0/(0.2998*3.80); //in cm
+        double A0 =  2.0*qR0*( (Tk0_y[i]-y)*cos(phi0) - (Tk0_x[i]-x)*sin(phi0) - qR0 );
+        double B0 = -2.0*qR0*( (Tk0_y[i]-y)*sin(phi0) + (Tk0_x[i]-x)*cos(phi0) );
+        double alp0 = atan2(B0/A0,1.0);
+        px0p = pt0*cos(phi0 + alp0);
+        py0p = pt0*sin(phi0 + alp0);
+        pz0p = Tk0_pz[i];
+	// Also swim the track position
+        x0p = Tk0_x[i] + qR0*( (1.0-cos(alp0))*sin(phi0) - sin(alp0)*cos(phi0) );
+        y0p = Tk0_y[i] - qR0*( (1.0-cos(alp0))*cos(phi0) + sin(alp0)*sin(phi0) );
+        z0p = Tk0_z[i] - qR0*tanl0*alp0;
+       
+
+	// Swim each track from inner hit to the conversion vertex - see convsel.C code
+        pt1 = sqrt(Tk1_px[i]*Tk1_px[i] + Tk1_py[i]*Tk1_py[i]);
+        tanl1 = Tk1_pz[i]/pt1;
+        phi1 = atan2(Tk1_py[i],Tk1_px[i]);
+        qR1 = double(PC_vTrack1_charge[i])*100.0*pt1/(0.2998*3.80); //in cm
+        double A1 =  2.0*qR1*( (Tk1_y[i]-y)*cos(phi1) - (Tk1_x[i]-x)*sin(phi1) - qR1 );
+        double B1 = -2.0*qR1*( (Tk1_y[i]-y)*sin(phi1) + (Tk1_x[i]-x)*cos(phi1) );
+        double alp1 = atan2(B1/A1,1.0);
+        px1p = pt1*cos(phi1 + alp1);
+        py1p = pt1*sin(phi1 + alp1);
+        pz1p = Tk1_pz[i];
+	// Also swim the track position
+        x1p = Tk1_x[i] + qR1*( (1.0-cos(alp1))*sin(phi1) - sin(alp1)*cos(phi1) );
+        y1p = Tk1_y[i] - qR1*( (1.0-cos(alp1))*cos(phi1) + sin(alp1)*sin(phi1) );
+        z1p = Tk1_z[i] - qR1*tanl1*alp1;
+        
+	CVi.q0 = PC_vTrack0_charge[i];
+        CVi.q1 = PC_vTrack1_charge[i];
+        CVi.px0p = px0p;
+	CVi.py0p = py0p;
+        CVi.pz0p = pz0p;
+	CVi.x0p = x0p;
+  	CVi.y0p = y0p;
+	CVi.z0p = z0p;
+
+	CVi.px1p = px1p;
+        CVi.py1p = py1p;
+        CVi.pz1p = pz1p;
+        CVi.x1p = x1p;
+        CVi.y1p = y1p;
+        CVi.z1p = z1p;
+
+	double ptasym = (pt0-pt1)/(pt0+pt1);
+        if (q0<0) ptasym = -ptasym;
+        double xplus = (1.0 + ptasym)/2.0;
+        CVi.xplus = xplus;
+
+
+
+	pc_comm[i] = CVi;
+
+
+
+    }//end loop over nconvs
+
+return pc_comm;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////
+//(0) create cutmask
+//
+std::vector<bool> GetCutMask(recosim& s, std::vector<CommonVars> cv ){
+
+  auto& PC_x = s.Conv_vtx_X;
+  auto& PC_vTrack0_nBefore = s.Conv_nHitsBeforeVtx_Tk0;
+  auto& PC_vTrack1_nBefore = s.Conv_nHitsBeforeVtx_Tk1;
+
+  std::vector<bool> cutmask(PC_x.GetSize());
+  double rerr,z,theta,fitprob,nBefore0,nBefore1;
+  for(int i=0; i<cutmask.size(); i++){
+        rerr = cv[i].rerr;
+        z = cv[i].z;
+        theta = cv[i].theta;
+        fitprob = cv[i].pfit;
+        nBefore0 = PC_vTrack0_nBefore[i];
+        nBefore1 = PC_vTrack1_nBefore[i];
+        if( rerr < GV.RERRCUT && abs(z) < GV.ZCUT && abs(cos(theta)) < GV.COSTCUT && fitprob > GV.FITPROBCUT && std::max(nBefore0,nBefore1)==0){
+                cutmask[i] = true;
+        }
+        else{
+                cutmask[i] = false;
+        }
+   }
+  return cutmask;      
+
+}
+
+
+
+
+

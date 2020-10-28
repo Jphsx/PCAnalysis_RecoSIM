@@ -134,9 +134,18 @@ void histset::AnalyzeEntry(recosim& s){
 
 	}
 	
- 	//disambiguation
- 	//get cut mask (check numerator cuts)
-	std::vector<bool> cutmask = GetCutMask(s);
+	//calculate common variables
+	std::vector<CommonVars> CVs = GetCommonVars(s,false);
+	 	
+	//get cut mask (check numerator cuts)
+	std::vector<bool> cutmask = GetCutMask(s,CVs);
+	int npcCut=0;
+	for(int i=0; i<cutmask.size(); i++){
+		if(cutmask[i]) npcCut++;
+	}
+	FillTH1(id_numpccutHist, npcCut, w);
+	
+        //disambiguation (only do hungarian algorithm on pc's that pass cutmask)
 	hgn_pc HGN = pc_disambiguation(s,cutmask);
 	FillTH1( id_numHGNPCHist, HGN.vsel.size(), w);
 

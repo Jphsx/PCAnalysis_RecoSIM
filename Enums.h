@@ -4,6 +4,7 @@
 		id_ptHist,
 	 	id_pzHist,
 		id_numpcHist,
+		id_numpccutHist,
 		id_numSPCHist,
 		id_ptSPCHist,
                 id_numHGNPCHist,
