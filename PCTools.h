@@ -573,6 +573,7 @@ std::vector<CommonVars> GetCommonVars(recosim& s, bool isRealData){//pass in boo
 	CVi.phip = phip;
 	CVi.rnominal = rnominal;
 	CVi.phi = phi;
+        CVi.theta = theta;
 	CVi.pt = pt;
 	CVi.E = E;
 	CVi.etaphys = eta;
@@ -682,6 +683,7 @@ std::vector<bool> GetCutMask(recosim& s, std::vector<CommonVars> cv ){
         fitprob = cv[i].pfit;
         nBefore0 = PC_vTrack0_nBefore[i];
         nBefore1 = PC_vTrack1_nBefore[i];
+//	std::cout<< rerr <<" "<< abs(z)<<" "<<abs(cos(theta))<<" "<<fitprob<<" "<<std::max(nBefore0,nBefore1)<<std::endl;
         if( rerr < GV.RERRCUT && abs(z) < GV.ZCUT && abs(cos(theta)) < GV.COSTCUT && fitprob > GV.FITPROBCUT && std::max(nBefore0,nBefore1)==0){
                 cutmask[i] = true;
         }
