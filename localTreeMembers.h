@@ -86,4 +86,10 @@
     auto& SimVtx_simtrk_parent_tid = s.SimVtx_simtrk_parent_tid;
     auto& SimTrk_trackId = s.SimTrk_trackId;
     auto& SimTrk_pt = s.SimTrk_pt;
-
+    auto& SimTrk_eta = s.SimTrk_eta;
+//    auto& SimTrk_pt = s.SimTrk_pt;
+    auto& SimTrk_pdgId = s.SimTrk_pdgId;
+    auto& SimVtx_x = s.SimVtx_x;
+    auto& SimVtx_y = s.SimVtx_y;
+    auto& SimVtx_z = s.SimVtx_z;
+    auto nSimVtx = *(s.nSimVtx);
