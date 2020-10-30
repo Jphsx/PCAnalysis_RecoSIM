@@ -326,6 +326,8 @@ struct sim_pc{
 	std::vector<int> p14_t2;
 	std::vector<int> p14_g;
 	std::vector<int> p14_key;//list of simvtx indices (intended to access conversions without fully looping sim vtx and checking mask
+	
+	
 
 };
 

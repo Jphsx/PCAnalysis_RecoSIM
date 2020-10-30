@@ -93,3 +93,4 @@
     auto& SimVtx_y = s.SimVtx_y;
     auto& SimVtx_z = s.SimVtx_z;
     auto nSimVtx = *(s.nSimVtx);
+    auto nSimTrk = *(s.nSimTrk);

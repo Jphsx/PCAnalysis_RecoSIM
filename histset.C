@@ -479,5 +479,56 @@ void histset::AnalyzeEntry(recosim& s){
 		
 	}//end HGN vsel loop for eff num
 
+	//find all photons parent and endpoint
+	//divide sectors
+	//fluxing photon means parent is vtx before or in sector and endpoint farther than sector outer edge
+	//converting photon means parent vtx is before or in sector and endpoint is in sector
+	//look at pt dist of fluxing photons,
+	
+	//gmask, store endpoint, origin, processtype endpoint, PT
+	std::vector<int> gparentIdx(nSimTrk,-1);
+	std::vector<int> gmask(nSimTrk,0);//mask of simtrks, pdg==22 and passes simcuts for photon (pt?) 0=not photon, 1=photon, 2=photon + and passes simcuts
+	std::vector<int> gchildIdx(nSimTrk,-1);
+	std::vector<int> gtop14(nSimTrk,0);//0=no p14, 1=converts, 2= converts and conversion passes simcuts
+
+	std::map<int,int> ptid_cvtx;
+	//loop to map child tid and simvtx
+	for(int i=0; i<nSimVtx; i++){
+		//map every child and parent index together?
+		ptid_cvtx.insert(pair<int,int>( SimVtx_simtrk_parent_tid[i], i));
+		
+	}
+
+	//loop to establish parent
+	for(int i=0; i<nSimTrk;i++){
+		if(SimTrk_pdgId[i] == 22){
+			gmask[i] = 1;
+			if(SimTrk_pt[i] > 0.2){
+
+				gmask[i] = 2;	
+			}
+			gparentIdx[i] = SimTrk_simvtx_Idx[i];
+
+			//use the map to get child sim vtx index
+			auto search =  ptid_cvtx.find( SimTrk_trackId[i] );
+			gchildIdx[i] = search->second;	
+			//std::cout<<search->first<<" "<<search->second<<std::endl;	
+		}	
+		
+	}	
+	//loop again to establish child
+	//int printonce=0;
+	/* int SIMVTXCIDX = SPC.p14_key[0];
+	
+	//check to make sure mapping went okay
+	for( int k=0; k<nSimTrk; k++){//gmask is size of sim trk
+	  //  std::cout<<"gparentvtxIdx "<<gparentIdx[k]<<" gmaskidx "<< k<< " gchildvtxIdx "<< gchildIdx[k]<<" mask "<<gmask[k]<<std::endl;
+	    if(gchildIdx[k] == SIMVTXCIDX){
+	//	std::cout<<"found"<<std::endl;
+	//	std::cout<<"idx of G from SPC "<<SPC.p14_g[SIMVTXCIDX]<< " SIMVTXCIDX "<< SIMVTXCIDX<<std::endl;
+	   }
+	}*/
+
+	
 }  // End of sub-program
 #endif
