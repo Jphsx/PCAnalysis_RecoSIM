@@ -270,7 +270,7 @@ void histset::AnalyzeEntry(recosim& s){
 	//use dL cut of 0.3 on dL_x to designate matching
 	std::vector<int> recoType_v0(numberOfPC);//define 3 categories 0=signal 1=bkg 2=unmatched bkg
 	int Type;
-	
+/*	
 	std::vector<double> dL_c_v0(numberOfPC);
 	std::vector<double> dL_b_v0(numberOfPC);
 	std::vector<double> dL_x_v0(numberOfPC);
@@ -280,6 +280,7 @@ void histset::AnalyzeEntry(recosim& s){
         std::vector<double> dL_b_v0_sidx(numberOfPC);
         std::vector<double> dL_x_v0_sidx(numberOfPC);
         std::vector<double> dL2_x_v0_sidx(numberOfPC);
+*/
 // i will rerun this program with different cutmasks and name the output files different by hand
 
 
@@ -289,7 +290,7 @@ void histset::AnalyzeEntry(recosim& s){
 	mindL_b = 999;
 	mindL_x = 999;
 	mindL2_x = 999;
-	for(int i=0; i< numberOfPC; i++){
+/*	for(int i=0; i< numberOfPC; i++){
 		cx = PC_x[i];
 		cy = PC_y[i];
 		cz = PC_z[i];
@@ -343,8 +344,8 @@ void histset::AnalyzeEntry(recosim& s){
 		recoType_v0[i] = Type;
 		FillTH1(id_comp0, Type, w);
 	}
-
-	std::vector<double> dL_c_v1(HGN.vsel.size());
+*/
+/*	std::vector<double> dL_c_v1(HGN.vsel.size());
         std::vector<double> dL_b_v1(HGN.vsel.size());
         std::vector<double> dL_x_v1(HGN.vsel.size());
         std::vector<double> dL2_x_v1(HGN.vsel.size());
@@ -353,14 +354,14 @@ void histset::AnalyzeEntry(recosim& s){
         std::vector<double> dL_b_v1_sidx(HGN.vsel.size());
         std::vector<double> dL_x_v1_sidx(HGN.vsel.size());
         std::vector<double> dL2_x_v1_sidx(HGN.vsel.size());
-		
+*/		
 	std::vector<int> recoType_v1(HGN.vsel.size());//no selection on sim
 
 	mindL_c = 999;
         mindL_b = 999;
         mindL_x = 999;
         mindL2_x = 999;
-	for(int i=0; i< HGN.vsel.size(); i++){
+/*	for(int i=0; i< HGN.vsel.size(); i++){
 		cx = PC_x[i];
                 cy = PC_y[i];
                 cz = PC_z[i];
@@ -413,7 +414,7 @@ void histset::AnalyzeEntry(recosim& s){
                 recoType_v1[i] = Type;
 		FillTH1(id_comp1, Type, w);
 	}// end HGN vsel loop
-	
+*/	
 
 //need to set sim mask and reco mask every compile, they should be consistent
 	double recoidx,recoxplus,recominTk,recogpt, rpt0, rpt1;
@@ -424,7 +425,7 @@ void histset::AnalyzeEntry(recosim& s){
 
 
 //do a loop first and set recomask
-	for(int i=0; i<HGN.vsel.size(); i++){
+/*	for(int i=0; i<HGN.vsel.size(); i++){
 		recoidx = HGN.vsel[i];
                 recogpt = sqrt(PC_x[recoidx]*PC_x[recoidx] + PC_y[recoidx]*PC_y[recoidx]);
                 rpt0 = sqrt(CVs[recoidx].px0p * CVs[recoidx].px0p + CVs[recoidx].py0p * CVs[recoidx].py0p);
@@ -439,12 +440,12 @@ void histset::AnalyzeEntry(recosim& s){
                 }
 
 	}
-
+*/
 
 //	_recomask=reco_mask0; ////////////////////////////////////////remember to change
 	_recomask=reco_mask2;
 //	_recomask=reco_mask3;
-	for(int i=0; i< HGN.vsel.size(); i++){//HGN num eff loop
+/*	for(int i=0; i< HGN.vsel.size(); i++){//HGN num eff loop
 	    //if(recoType_v1[i] == 0){//matched to sim conversion
 		recoidx = HGN.vsel[i];	
 		recogpt = sqrt(PC_x[recoidx]*PC_x[recoidx] + PC_y[recoidx]*PC_y[recoidx]);
@@ -478,7 +479,7 @@ void histset::AnalyzeEntry(recosim& s){
 
 		
 	}//end HGN vsel loop for eff num
-
+*/
 	//find all photons parent and endpoint
 	//divide sectors
 	//fluxing photon means parent is vtx before or in sector and endpoint farther than sector outer edge
@@ -486,9 +487,9 @@ void histset::AnalyzeEntry(recosim& s){
 	//look at pt dist of fluxing photons,
 	
 	//gmask, store endpoint, origin, processtype endpoint, PT
-	std::vector<int> gparentIdx(nSimTrk,-1);
+	std::vector<int> gparentIdx(nSimTrk,-1);//simvtx idx
 	std::vector<int> gmask(nSimTrk,0);//mask of simtrks, pdg==22 and passes simcuts for photon (pt?) 0=not photon, 1=photon, 2=photon + and passes simcuts
-	std::vector<int> gchildIdx(nSimTrk,-1);
+	std::vector<int> gchildIdx(nSimTrk,-1);//simvtx idx
 	std::vector<int> gtop14(nSimTrk,0);//0=no p14, 1=converts, 2= converts and conversion passes simcuts
 
 	std::map<int,int> ptid_cvtx;
@@ -512,22 +513,125 @@ void histset::AnalyzeEntry(recosim& s){
 			//use the map to get child sim vtx index
 			auto search =  ptid_cvtx.find( SimTrk_trackId[i] );
 			gchildIdx[i] = search->second;	
+			if( SimVtx_processType[ gchildIdx[i]  ] == 14 ){
+				gtop14[i] = 1;
+				//todo if check mask of conv to pass? for 2
+			}
 			//std::cout<<search->first<<" "<<search->second<<std::endl;	
 		}	
 		
 	}	
 	//loop again to establish child
 	//int printonce=0;
-	/* int SIMVTXCIDX = SPC.p14_key[0];
-	
+	int SIMVTXCIDX;
+	if(SPC.p14_key.size() >0 ){
+	  SIMVTXCIDX = SPC.p14_key[0];
+	}
+
+	int startIdx;
+	int endIdx;
+	double start_x,start_y,start_z, start_r;
+	double end_x,end_y,end_z, end_r;
+	double GPT,THETAG, GPZ;
 	//check to make sure mapping went okay
+	//
+	//define sectors
+	//0<r<=5
+	//5<r<=9
+	//9<r<=14
+	//14<r<=18
+	//18<r<25
 	for( int k=0; k<nSimTrk; k++){//gmask is size of sim trk
-	  //  std::cout<<"gparentvtxIdx "<<gparentIdx[k]<<" gmaskidx "<< k<< " gchildvtxIdx "<< gchildIdx[k]<<" mask "<<gmask[k]<<std::endl;
-	    if(gchildIdx[k] == SIMVTXCIDX){
+	  
+            if(gmask[k] >0){
+		 // std::cout<<"gparentvtxIdx "<<gparentIdx[k]<<" gmaskidx "<< k<< " gchildvtxIdx "<< gchildIdx[k]<<" mask "<<gmask[k]<<std::endl;
+		startIdx = gparentIdx[k];
+		endIdx = gchildIdx[k];
+		start_x = SimVtx_x[startIdx];
+		start_y = SimVtx_y[startIdx];
+		start_z = SimVtx_z[startIdx];
+		end_x = SimVtx_x[endIdx];
+		end_y = SimVtx_y[endIdx];
+		end_z = SimVtx_z[endIdx];
+		//std::cout<<"g start position "<<start_x<<" "<<start_y<<" "<<start_z<<" "<<std::endl;
+		//std::cout<<"g end position "<<end_x<<" "<<end_y<<" "<<end_z<<" converted? "<<gtop14[k]<<" ptype "<<SimVtx_processType[endIdx]<<std::endl;
+		start_r = sqrt( start_x*start_x + start_y*start_y);
+		end_r = sqrt(end_x*end_x + end_y*end_y);
+		
+			
+		//sector 1 flux
+		GPT = SimTrk_pt[k];
+                GPZ = gpt* sinh( SimTrk_eta[k]);
+               
+                THETAG = atan2(GPT,GPZ);
+		
+		if( abs(start_z) < GV.ZCUT && abs(cos(THETAG)) < GV.COSTCUT){
+
+		if( start_r < 5 ){
+			FillTH1(id_gfluxpt_s1, GPT, w);
+			FillTH1(id_ngflux_s1, 0, w);
+			if( end_r < 5 && abs(end_z) <GV.ZCUT ){
+				FillTH1(id_ngflux_pcall_s1, 0, w);	
+			}
+			if( end_r < 5 && sim_mask4[ gchildIdx[k] ] ){
+				FillTH1(id_ngflux_pccut_s1,0,w);
+			}
+		}
+		if( start_r < 9 && end_r > 5){
+			FillTH1(id_gfluxpt_s2, GPT, w);
+                        FillTH1(id_ngflux_s2, 0, w);
+                        if( end_r < 9 && abs(end_z) <GV.ZCUT ){
+                                FillTH1(id_ngflux_pcall_s2, 0, w);
+                        }
+                        if( end_r < 9 && sim_mask4[ gchildIdx[k] ] ){
+                                FillTH1(id_ngflux_pccut_s2,0,w);
+                        }
+
+		}
+		if( start_r < 14 && end_r > 9){
+			FillTH1(id_gfluxpt_s3, GPT, w);
+                        FillTH1(id_ngflux_s3, 0, w);
+                        if( end_r < 14 && abs(end_z) <GV.ZCUT ){
+                                FillTH1(id_ngflux_pcall_s3, 0, w);
+                        }
+                        if( end_r < 14 && sim_mask4[ gchildIdx[k] ] ){
+                                FillTH1(id_ngflux_pccut_s3,0,w);
+                        }
+
+		}
+		if( start_r < 18 && end_r > 14){
+			FillTH1(id_gfluxpt_s4, GPT, w);
+                        FillTH1(id_ngflux_s4, 0, w);
+                        if( end_r < 18 && abs(end_z) <GV.ZCUT ){
+                                FillTH1(id_ngflux_pcall_s4, 0, w);
+                        }
+                        if( end_r < 18 && sim_mask4[ gchildIdx[k] ] ){
+                                FillTH1(id_ngflux_pccut_s4,0,w);
+                        }
+
+		}
+		if( start_r < 25 && end_r > 18){
+			FillTH1(id_gfluxpt_s5, GPT, w);
+                        FillTH1(id_ngflux_s5, 0, w);
+                        if( end_r < 25 && abs(end_z) <GV.ZCUT ){
+                                FillTH1(id_ngflux_pcall_s5, 0, w);
+                        }
+                        if( end_r < 25 && sim_mask4[ gchildIdx[k] ] ){
+                                FillTH1(id_ngflux_pccut_s5,0,w);
+                        }
+
+		}
+		
+		}//end z/cost conditional
+
+	    }
+	//    if(SPC.p14_key.size()>0 && gchildIdx[k] == SIMVTXCIDX){
 	//	std::cout<<"found"<<std::endl;
 	//	std::cout<<"idx of G from SPC "<<SPC.p14_g[SIMVTXCIDX]<< " SIMVTXCIDX "<< SIMVTXCIDX<<std::endl;
-	   }
-	}*/
+	  // }
+	}
+
+	
 
 	
 }  // End of sub-program

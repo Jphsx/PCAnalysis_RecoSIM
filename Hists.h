@@ -61,6 +61,36 @@ void histset::init(){
     TH1Manager.at(id_minTkden1) = new MyTH1D("minTkden1", "Sim. PC pair min. p_{T};p_{T} [GeV];Entries per bin",40,0.0,2.0);
     TH1Manager.at(id_Rden1) = new MyTH1D("Rden1", "Sim. PC Radius;R [cm];Entries per bin",100,0.,10);
     TH1Manager.at(id_Rwideden1) = new MyTH1D("Rwideden1","Sim. PC Radius;R [cm]; Entries per bin",250,0.,25.);
+   
+    TH1Manager.at(id_gfluxpt_s1) = new MyTH1D("gfluxpt_s1", "Sim. Photon P_{T} in section 1;p_{T} [GeV];Entries per bin",100,0.,5.);
+    TH1Manager.at(id_ngflux_s1) = new MyTH1D("ngflux_s1", "Number of Sim. Photons in section 1;N Photons;Entries per bin",1,0,1);
+    TH1Manager.at(id_ngflux_pcall_s1) = new MyTH1D("ngflux_pcall_s1","Number of Sim. PC in section 1; N Conversions;Entries per bin",1,0,1);
+    TH1Manager.at(id_ngflux_pccut_s1) = new MyTH1D("ngflux_pccut_s1","Number of Reconstructable Sim. PC in section 1; N Conversions;Entries per bin",1,0,1);
+
+    TH1Manager.at(id_gfluxpt_s2) = new MyTH1D("gfluxpt_s2", "Sim. Photon P_{T} in section 2;p_{T} [GeV];Entries per bin",100,0.,5.);
+    TH1Manager.at(id_ngflux_s2) = new MyTH1D("ngflux_s2", "Number of Sim. Photons in section 2;N Photons;Entries per bin",1,0,1);
+    TH1Manager.at(id_ngflux_pcall_s2) = new MyTH1D("ngflux_pcall_s2","Number of Sim. PC in section 2; N Conversions;Entries per bin",1,0,1);
+    TH1Manager.at(id_ngflux_pccut_s2) = new MyTH1D("ngflux_pccut_s2","Number of Reconstructable Sim. PC in section 2; N Conversions;Entries per bin",1,0,1);
+  
+    TH1Manager.at(id_gfluxpt_s3) = new MyTH1D("gfluxpt_s3", "Sim. Photon P_{T} in section 3;p_{T} [GeV];Entries per bin",100,0.,5.);
+    TH1Manager.at(id_ngflux_s3) = new MyTH1D("ngflux_s3", "Number of Sim. Photons in section 3;N Photons;Entries per bin",1,0,1);
+    TH1Manager.at(id_ngflux_pcall_s3) = new MyTH1D("ngflux_pcall_s3","Number of Sim. PC in section 3; N Conversions;Entries per bin",1,0,1);
+    TH1Manager.at(id_ngflux_pccut_s3) = new MyTH1D("ngflux_pccut_s3","Number of Reconstructable Sim. PC in section 3; N Conversions;Entries per bin",1,0,1);
+
+    TH1Manager.at(id_gfluxpt_s4) = new MyTH1D("gfluxpt_s4", "Sim. Photon P_{T} in section 4;p_{T} [GeV];Entries per bin",100,0.,5.);
+    TH1Manager.at(id_ngflux_s4) = new MyTH1D("ngflux_s4", "Number of Sim. Photons in section 4;N Photons;Entries per bin",1,0,1);
+    TH1Manager.at(id_ngflux_pcall_s4) = new MyTH1D("ngflux_pcall_s4","Number of Sim. PC in section 4; N Conversions;Entries per bin",1,0,1);
+    TH1Manager.at(id_ngflux_pccut_s4) = new MyTH1D("ngflux_pccut_s4","Number of Reconstructable Sim. PC in section 4; N Conversions;Entries per bin",1,0,1);
+
+    TH1Manager.at(id_gfluxpt_s5) = new MyTH1D("gfluxpt_s5", "Sim. Photon P_{T} in section 5;p_{T} [GeV];Entries per bin",100,0.,5.);
+    TH1Manager.at(id_ngflux_s5) = new MyTH1D("ngflux_s5", "Number of Sim. Photons in section 5;N Photons;Entries per bin",1,0,1);
+    TH1Manager.at(id_ngflux_pcall_s5) = new MyTH1D("ngflux_pcall_s5","Number of Sim. PC in section 5; N Conversions;Entries per bin",1,0,1);
+    TH1Manager.at(id_ngflux_pccut_s5) = new MyTH1D("ngflux_pccut_s5","Number of Reconstructable Sim. PC in section 5; N Conversions;Entries per bin",1,0,1);
+
+
+
+
+	
 
 // init TH2D
     TH2Manager.at(id_xyHist) = new MyTH2D("xyHist", "Conversion Vertices per mm^{2} bin; x (cm); y (cm)",200,-10.,10.,200,-10.,10.);
