@@ -65,4 +65,6 @@
 		id_rphiHist,
 	        id_xywideCPCHist,
 		id_xywideHGNPCHist, 
+		id_dLcpt,
+		id_dLcpt1,
             numTH2Hist};

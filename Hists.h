@@ -88,5 +88,7 @@ void histset::init(){
     TH2Manager.at(id_xyHist) = new MyTH2D("xyHist", "Conversion Vertices per mm^{2} bin; x (cm); y (cm)",200,-10.,10.,200,-10.,10.);
     TH2Manager.at(id_xywideHist) = new MyTH2D("xywideHist", "Conversion Vertices per mm^{2} bin; x (cm); y (cm)",500,-25.,25.,500,-25.,25.);
     TH2Manager.at(id_rphiHist) = new MyTH2D("rphiHist", "Conversion Vertices in R-#phi per mm*60mrad bin; R (cm); #phi",250,0.0,25.0,40,-PI,PI);
+    TH2Manager.at(id_dLcpt) = new MyTH2D("dLcpt","nearest simpc and reco pt",20,0,1.0,20,0,5.0);//without cuts
+    TH2Manager.at(id_dLcpt1) = new MyTH2D("dLcpt1","nearest simpc and reco pt with cut",20,0,1.0,20,0,5.0);//with cuts
 }//end histogram init
 

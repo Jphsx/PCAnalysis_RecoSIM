@@ -316,32 +316,42 @@ void histset::AnalyzeEntry(recosim& s){
         std::vector<double> dL2_x_v0_sidx(numberOfPC);
 // i will rerun this program with different cutmasks and name the output files different by hand
 
-
+	double PX,PY,PT, MINPT;
+	
 	
 	//make all min big
 	mindL_c = 999;
 	mindL_b = 999;
 	mindL_x = 999;
 	mindL2_x = 999;
+	MINPT = 9999;
 	for(int i=0; i< numberOfPC; i++){
 		cx = PC_x[i];
 		cy = PC_y[i];
 		cz = PC_z[i];
+		PX = PC_Px[i];
+		PY = PC_Py[i];
+		PT = sqrt(PX*PX + PY*PY);
+
 		for(int j=0; j<nSimVtx; j++){
 			sx = SimVtx_x[j];
 			sy = SimVtx_y[j];
 			sz = SimVtx_z[j];
 			dL = sqrt( (sx-cx)*(sx-cx) + (sy-cy)*(sy-cy) + (sz-cz)*(sz-cz) );
+			
+
 			if( SimVtx_processType[j] == 14  && _simmask[j]==true ){
 				if( dL < mindL_c ){
 				    mindL_c = dL;
 				    idx_c = j; 	 
+				    MINPT = PT;
 				}
 			}
 			if( SimVtx_processType[j] != 14){
 				if( dL < mindL_b ){
 				    mindL_b = dL;
 				    idx_b = j;
+				
 				}
 			}
 			if( dL < mindL_x ){
@@ -369,7 +379,7 @@ void histset::AnalyzeEntry(recosim& s){
 		FillTH1(id_mindLb0, mindL_b, w);
 		FillTH1(id_mindLx0, mindL_x, w);
 		FillTH1(id_mindL2x0, mindL2_x , w);
-		
+		FillTH2(id_dLcpt, mindL_c, MINPT, w);
 		if( mindL_c < mindL_b) Type =0;
 		if( mindL_b < mindL_c) Type =1;
 	//	if( mindL_x > 0.3) Type =2;
@@ -390,6 +400,8 @@ void histset::AnalyzeEntry(recosim& s){
 		
 	std::vector<int> recoType_v1(HGN.vsel.size());//no selection on sim
 
+	 	
+
 	mindL_c = 999;
         mindL_b = 999;
         mindL_x = 999;
@@ -398,6 +410,11 @@ void histset::AnalyzeEntry(recosim& s){
 		cx = PC_x[i];
                 cy = PC_y[i];
                 cz = PC_z[i];
+
+		PX = PC_Px[i];
+                PY = PC_Py[i];
+                PT = sqrt(PX*PX + PY*PY);
+
                 for(int j=0; j<nSimVtx; j++){
                         sx = SimVtx_x[j];
                         sy = SimVtx_y[j];
@@ -407,6 +424,8 @@ void histset::AnalyzeEntry(recosim& s){
                                 if( dL < mindL_c ){ 
                                     mindL_c = dL;
                                     idx_c = j;
+				    MINPT = PT;
+
                                 }
                         }
                         if( SimVtx_processType[j] != 14){
@@ -439,7 +458,7 @@ void histset::AnalyzeEntry(recosim& s){
                 FillTH1(id_mindLb1, mindL_b, w);
                 FillTH1(id_mindLx1, mindL_x, w);
                 FillTH1(id_mindL2x1, mindL2_x , w);
-
+		FillTH2(id_dLcpt1, mindL_c, MINPT, w);
 		if( mindL_c < mindL_b) Type =0;
                 if( mindL_b < mindL_c) Type =1;
          //       if( mindL_x > 0.3) Type =2;
@@ -460,7 +479,7 @@ void histset::AnalyzeEntry(recosim& s){
 //do a loop first and set recomask
 	for(int i=0; i<HGN.vsel.size(); i++){
 		recoidx = HGN.vsel[i];
-                recogpt = sqrt(PC_x[recoidx]*PC_x[recoidx] + PC_y[recoidx]*PC_y[recoidx]);
+                recogpt = sqrt(PC_x[recoidx]*PC_x[recoidx] + PC_Py[recoidx]*PC_Py[recoidx]);
                 rpt0 = sqrt(CVs[recoidx].px0p * CVs[recoidx].px0p + CVs[recoidx].py0p * CVs[recoidx].py0p);
                 rpt1 = sqrt(CVs[recoidx].px1p * CVs[recoidx].px1p + CVs[recoidx].py1p * CVs[recoidx].py1p);
                 recominTk = std::min(rpt0,rpt1);
@@ -484,7 +503,7 @@ void histset::AnalyzeEntry(recosim& s){
 	for(int i=0; i< HGN.vsel.size(); i++){//HGN num eff loop
 	    //if(recoType_v1[i] == 0){//matched to sim conversion
 		recoidx = HGN.vsel[i];	
-		recogpt = sqrt(PC_x[recoidx]*PC_x[recoidx] + PC_y[recoidx]*PC_y[recoidx]);
+		recogpt = sqrt(PC_x[recoidx]*PC_x[recoidx] + PC_Py[recoidx]*PC_Py[recoidx]);
 		rpt0 = sqrt(CVs[recoidx].px0p * CVs[recoidx].px0p + CVs[recoidx].py0p * CVs[recoidx].py0p);
 	        rpt1 = sqrt(CVs[recoidx].px1p * CVs[recoidx].px1p + CVs[recoidx].py1p * CVs[recoidx].py1p);
 		recominTk = std::min(rpt0,rpt1);
@@ -492,6 +511,7 @@ void histset::AnalyzeEntry(recosim& s){
 		
 
 	     if(recoType_v1[i] == 0 && _recomask[recoidx]){
+	// if(recoType_v1[i] == 0 ){	
 		FillTH1(id_ptnum1, recogpt, w);
 		FillTH1(id_xpnum1, recoxplus, w);
 		FillTH1(id_minTknum1, recominTk, w);
