@@ -1,9 +1,10 @@
 # Makefile for the new ntuple processing
+# # On the CRC cluster, "module load boost" 
 main: histset.o recosim.o ParTreeProcessing.C
-	g++ -o compiledThreads ParTreeProcessing.C -pthread `root-config --cflags --libs`
+	g++ -o compiledThreads ParTreeProcessing.C -pthread -I ${BOOSTINCLUDE} `root-config --cflags --libs`
 
 histset.o: histset.C recosim.o Hungarian.h
-	g++ -c -pthread histset.C `root-config --cflags --libs`
+	g++ -c -pthread  histset.C -I ${BOOSTINCLUDE} `root-config --cflags --libs`
 
 recosim.o: recosim.C recosim.h
 	g++ -c -pthread recosim.C `root-config --cflags --libs`

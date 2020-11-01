@@ -14,6 +14,9 @@
 #include <tuple>
 #include <iomanip>
 #include "Hungarian.h"
+#include <bitset>
+#include <boost/dynamic_bitset.hpp>
+
 using MyTH1D = ROOT::TThreadedObject<TH1D>;
 using MyTH2D = ROOT::TThreadedObject<TH2D>;
 
@@ -104,8 +107,10 @@ void histset::WriteHist(){
 }
 
 void histset::AnalyzeEntry(recosim& s){
+ 
 	double w = 1.0;
 	#include "localTreeMembers.h"     //All the variable incantations needed
+
 
 	FillTH1( id_numpcHist, numberOfPC,w);
 
@@ -146,6 +151,8 @@ void histset::AnalyzeEntry(recosim& s){
 			npcCut++;
 			FillTH1(id_ptCutHist, PC_pt, w);
 			FillTH1(id_pzCutHist, PC_Pz[i], w);
+			FillTH2(id_xywideCPCHist, CVs[i].x, CVs[i].y, w);
+
 		}
 
 	}
@@ -153,17 +160,20 @@ void histset::AnalyzeEntry(recosim& s){
 	
         //disambiguation (only do hungarian algorithm on pc's that pass cutmask)
 	hgn_pc HGN = pc_disambiguation(s,cutmask);
+	std::vector<bool> HGNmask(numberOfPC,false);
 	FillTH1( id_numHGNPCHist, HGN.vsel.size(), w);
 	int cidx;
 	for(int i=0; i<HGN.vsel.size(); i++){
 		cidx = HGN.vsel[i];
+		HGNmask[cidx] = true;	
 		double PC_pt = sqrt(PC_Px[cidx]*PC_Px[cidx] + PC_Py[cidx]*PC_Py[cidx]);
 		FillTH1( id_ptHCutHist, PC_pt, w);
 		FillTH1( id_pzHCutHist, PC_Pz[cidx], w);
-	
+		FillTH2( id_xywideHGNPCHist, CVs[cidx].x, CVs[cidx].y, w); 	
 	}
 
 ////////////////////////end example stuff
+
 
 	//do some sim stuff
 	//plot sim asym and min pt tracks
@@ -215,7 +225,7 @@ void histset::AnalyzeEntry(recosim& s){
 		if( xplus < 0.9 && xplus > 0.1 ) sim_mask3[vidx] = true;
 		if( std::min(pt0,pt1) > 0.2 ) sim_mask2[vidx] = true;
 		if( std::min(pt0,pt1) > 0.2 && abs(simz) <GV.ZCUT && abs(cos(simthetag))<GV.COSTCUT ) sim_mask4[vidx] = true;		                           
-		
+//		if( std::min(pt0,pt1) > 0.2 && abs(simz) <GV.ZCUT && abs(cos(simthetag))<GV.COSTCUT && gpt>3) sim_mask4[vidx] = true;  /////REMember to change (for pt>5 run)	
 
 		//if( _simmask[vidx] == true ){
 	        //    FillTH1(id_ptden1, gpt, w);
@@ -224,6 +234,8 @@ void histset::AnalyzeEntry(recosim& s){
 	//	} 
 
 	}	
+
+
 	//uncomment the one being used
 //      _simmask=sim_mask0;//////////////////////////////////////////////// remember to change
 //        _simmask=sim_mask2;
@@ -234,6 +246,9 @@ void histset::AnalyzeEntry(recosim& s){
 		if(_simmask[i]){
 	            t0idx = SPC.p14_t1[i];
 		    t1idx = SPC.p14_t2[i];
+//		    gidx= SPC.p14_g[vidx];
+		    gidx = SPC.p14_g[i];
+		    gpt = SimTrk_pt[gidx];
  		    pt0 = SimTrk_pt[t0idx];
                     pt1 = SimTrk_pt[t1idx];
                     q0 = -( SimTrk_pdgId[t0idx]/abs(SimTrk_pdgId[t0idx]) );
@@ -250,12 +265,31 @@ void histset::AnalyzeEntry(recosim& s){
                     FillTH1(id_minTkden1, std::min(pt0,pt1), w);
 		    FillTH1(id_Rden1, rsim, w);
 		    FillTH1(id_Rwideden1,rsim, w);
+		   if( rsim <= 5){
+			FillTH1(id_rden_s1, 0, w);
+		   }
+		   if( rsim > 5 && rsim <= 9 ){
+			FillTH1(id_rden_s2, 0, w);
+		   }
+		   if( rsim > 9 && rsim <= 14 ){
+                        FillTH1(id_rden_s3, 0, w);
+                   }
+		   if( rsim > 14 && rsim <= 18 ){
+                        FillTH1(id_rden_s4, 0, w);
+                   }
+		   if( rsim > 18 && rsim <= 25 ){
+                        FillTH1(id_rden_s5, 0, w);
+                   }
+		
+ 
+
 		}
 	}
 /////////////////////
 	//study some cuts at sim level pc
 	
-	
+
+
 
 ////////////////////////
 	//do some matching with reco do it both for HGNpc and PC with no cuts
@@ -339,7 +373,7 @@ void histset::AnalyzeEntry(recosim& s){
 		if( mindL_c < mindL_b) Type =0;
 		if( mindL_b < mindL_c) Type =1;
 	//	if( mindL_x > 0.3) Type =2;
-		if( std::min(mindL_c, mindL_b) > 0.3) Type=2;
+		if( std::min(mindL_c, mindL_b) > 0.5) Type=2;
 		recoType_v0[i] = Type;
 		FillTH1(id_comp0, Type, w);
 	}
@@ -409,7 +443,7 @@ void histset::AnalyzeEntry(recosim& s){
 		if( mindL_c < mindL_b) Type =0;
                 if( mindL_b < mindL_c) Type =1;
          //       if( mindL_x > 0.3) Type =2;
-         	if( std::min(mindL_c, mindL_b) > 0.3) Type=2;
+         	if( std::min(mindL_c, mindL_b) > 0.5) Type=2;
                 recoType_v1[i] = Type;
 		FillTH1(id_comp1, Type, w);
 	}// end HGN vsel loop
@@ -435,15 +469,18 @@ void histset::AnalyzeEntry(recosim& s){
                         reco_mask3[recoidx] = true;
                 }
                 if( recominTk > 0.2 ){
+                //if( recominTk > 0.2 && recogpt>3){///////////////////////////remember to change (for pt>5 radial eff run)
                         reco_mask2[recoidx] = true;
                 }
 
 	}
 
 
+
 //	_recomask=reco_mask0; ////////////////////////////////////////remember to change
 	_recomask=reco_mask2;
 //	_recomask=reco_mask3;
+//	std::vector<int> TYPEmask(numberOfPC,-1);
 	for(int i=0; i< HGN.vsel.size(); i++){//HGN num eff loop
 	    //if(recoType_v1[i] == 0){//matched to sim conversion
 		recoidx = HGN.vsel[i];	
@@ -455,11 +492,29 @@ void histset::AnalyzeEntry(recosim& s){
 		
 
 	     if(recoType_v1[i] == 0 && _recomask[recoidx]){
-		FillTH1(id_ptnum1, gpt, w);
+		FillTH1(id_ptnum1, recogpt, w);
 		FillTH1(id_xpnum1, recoxplus, w);
 		FillTH1(id_minTknum1, recominTk, w);
 		FillTH1(id_Rnum1 , CVs[recoidx].radius, w);
 		FillTH1(id_Rwidenum1, CVs[recoidx].radius, w);
+		
+		   if( CVs[recoidx].radius <= 5){
+                        FillTH1(id_rnum_s1, 0, w);
+                   }
+                   if( CVs[recoidx].radius > 5 && CVs[recoidx].radius <= 9 ){
+                        FillTH1(id_rnum_s2, 0, w);
+                   }
+                   if( CVs[recoidx].radius > 9 && CVs[recoidx].radius <= 14 ){
+                        FillTH1(id_rnum_s3, 0, w);
+                   }
+                   if( CVs[recoidx].radius > 14 && CVs[recoidx].radius <= 18 ){
+                        FillTH1(id_rnum_s4, 0, w);
+                   }
+                   if( CVs[recoidx].radius > 18 && CVs[recoidx].radius <= 25 ){
+                        FillTH1(id_rnum_s5, 0, w);
+                   }
+		
+
 	     }
 	     if(recoType_v1[i] == 1){
 		FillTH1(id_ptnumB1, gpt, w);
@@ -476,58 +531,89 @@ void histset::AnalyzeEntry(recosim& s){
                 FillTH1(id_RwidenumU1, CVs[recoidx].radius, w);
              }
 
+	     
+
 		
 	}//end HGN vsel loop for eff num
+////////////////////////CUTFLOW//////////////////////////////////////	
+        enum cuts{ _base= 0,_r=1, _z=2, _cost=3, _prob=4, _nb40=5, _nb41=6, _HGN=7, _minpt0=8, _minpt1=9, _numcuts=10};
+	boost::dynamic_bitset<uint16_t> bitS(_numcuts);	
+        boost::dynamic_bitset<uint16_t> bitB(_numcuts);
+	boost::dynamic_bitset<uint16_t> bitU(_numcuts);
+	for(int i=0; i<numberOfPC; i++){
+		if(recoType_v0[i]==0) bitS.set(_base);
+                if(recoType_v0[i]==1) bitB.set(_base);
+                if(recoType_v0[i]==2) bitU.set(_base);
 
-	//find all photons parent and endpoint
-	//divide sectors
-	//fluxing photon means parent is vtx before or in sector and endpoint farther than sector outer edge
-	//converting photon means parent vtx is before or in sector and endpoint is in sector
-	//look at pt dist of fluxing photons,
+		if( CVs[i].rerr < GV.RERRCUT){
+			if(recoType_v0[i]==0) bitS.set(_r);
+			if(recoType_v0[i]==1) bitB.set(_r);
+			if(recoType_v0[i]==2) bitU.set(_r);
+		}
+		if( abs(CVs[i].z) < GV.ZCUT){
+			if(recoType_v0[i]==0) bitS.set(_z);
+			if(recoType_v0[i]==1) bitB.set(_z);
+			if(recoType_v0[i]==2) bitU.set(_z);
+		}
+		if( abs(cos( CVs[i].theta)) < GV.COSTCUT){
+			if(recoType_v0[i]==0) bitS.set(_cost);
+			if(recoType_v0[i]==1) bitB.set(_cost);
+			if(recoType_v0[i]==2) bitU.set(_cost);	
+		}
+		if( CVs[i].pfit > GV.FITPROBCUT ){
+			if(recoType_v0[i]==0) bitS.set(_prob);
+			if(recoType_v0[i]==1) bitB.set(_prob);
+			if(recoType_v0[i]==2) bitU.set(_prob);
+		}
+		if( PC_vTrack0_nBefore[i] == 0){
+			if(recoType_v0[i]==0) bitS.set(_nb40);
+			if(recoType_v0[i]==1) bitB.set(_nb40);
+			if(recoType_v0[i]==2) bitU.set(_nb40);
+		}
+		if( PC_vTrack1_nBefore[i] == 0){
+			if(recoType_v0[i]==0) bitS.set(_nb41);
+			if(recoType_v0[i]==1) bitB.set(_nb41);
+			if(recoType_v0[i]==2) bitU.set(_nb41);
+		}
+		if( HGNmask[i] ){//NOTE this cut has all of the preceding cuts built into it!!!!!
+			if(recoType_v0[i]==0) bitS.set(_HGN);
+			if(recoType_v0[i]==1) bitB.set(_HGN);
+			if(recoType_v0[i]==2) bitU.set(_HGN);
+		}
+		rpt0 = sqrt(CVs[i].px0p * CVs[i].px0p + CVs[i].py0p * CVs[i].py0p);
+                rpt1 = sqrt(CVs[i].px1p * CVs[i].px1p + CVs[i].py1p * CVs[i].py1p);
 	
-	//gmask, store endpoint, origin, processtype endpoint, PT
-	std::vector<int> gparentIdx(nSimTrk,-1);
-	std::vector<int> gmask(nSimTrk,0);//mask of simtrks, pdg==22 and passes simcuts for photon (pt?) 0=not photon, 1=photon, 2=photon + and passes simcuts
-	std::vector<int> gchildIdx(nSimTrk,-1);
-	std::vector<int> gtop14(nSimTrk,0);//0=no p14, 1=converts, 2= converts and conversion passes simcuts
-
-	std::map<int,int> ptid_cvtx;
-	//loop to map child tid and simvtx
-	for(int i=0; i<nSimVtx; i++){
-		//map every child and parent index together?
-		ptid_cvtx.insert(pair<int,int>( SimVtx_simtrk_parent_tid[i], i));
-		
+		if( rpt0 > 0.2 ){
+			if(recoType_v0[i]==0) bitS.set(_minpt0);
+			if(recoType_v0[i]==1) bitB.set(_minpt0);
+			if(recoType_v0[i]==2) bitU.set(_minpt0);
+		} 
+		if( rpt1 > 0.2 ){
+			if(recoType_v0[i]==0) bitS.set(_minpt1);
+			if(recoType_v0[i]==1) bitB.set(_minpt1);
+			if(recoType_v0[i]==2) bitU.set(_minpt1);
+		}
 	}
 
-	//loop to establish parent
-	for(int i=0; i<nSimTrk;i++){
-		if(SimTrk_pdgId[i] == 22){
-			gmask[i] = 1;
-			if(SimTrk_pt[i] > 0.2){
+	//TYPE 0
+	bool flag = true;
+        for(int i=0; i<bitS.size(); i++){
+                if( !bitS.test(i) ) flag = false;
+                if( flag) FillTH1(id_pcScutflow,i,w);
+        }
+	//TYPE 1
+	flag = true;
+	for(int i=0; i<bitB.size(); i++){ 
+                if( !bitB.test(i) ) flag = false;
+                if( flag) FillTH1(id_pcBcutflow,i,w);
+        }	
+	//TYPE 2
+	flag = true;
+	for(int i=0; i<bitU.size(); i++){ 
+                if( !bitU.test(i) ) flag = false;
+                if( flag) FillTH1(id_pcUcutflow,i,w);
+        }
 
-				gmask[i] = 2;	
-			}
-			gparentIdx[i] = SimTrk_simvtx_Idx[i];
-
-			//use the map to get child sim vtx index
-			auto search =  ptid_cvtx.find( SimTrk_trackId[i] );
-			gchildIdx[i] = search->second;	
-			//std::cout<<search->first<<" "<<search->second<<std::endl;	
-		}	
-		
-	}	
-	//loop again to establish child
-	//int printonce=0;
-	/* int SIMVTXCIDX = SPC.p14_key[0];
-	
-	//check to make sure mapping went okay
-	for( int k=0; k<nSimTrk; k++){//gmask is size of sim trk
-	  //  std::cout<<"gparentvtxIdx "<<gparentIdx[k]<<" gmaskidx "<< k<< " gchildvtxIdx "<< gchildIdx[k]<<" mask "<<gmask[k]<<std::endl;
-	    if(gchildIdx[k] == SIMVTXCIDX){
-	//	std::cout<<"found"<<std::endl;
-	//	std::cout<<"idx of G from SPC "<<SPC.p14_g[SIMVTXCIDX]<< " SIMVTXCIDX "<< SIMVTXCIDX<<std::endl;
-	   }
-	}*/
 
 	
 }  // End of sub-program

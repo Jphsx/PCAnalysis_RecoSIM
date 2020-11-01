@@ -9,6 +9,7 @@ void histset::init(){
     TH1Manager.at(id_numpccutHist) = new MyTH1D("numpccutHist","Number of PC After Selection Cuts;;Entries per bin",20,-0.5,19.5);
     TH1Manager.at(id_ptCutHist) = new MyTH1D("ptCutHist", "p_{T} Distribution after Selection;p_{T};1/p_{T} dN/dp_{T}", 100, 0.0, 5.0);
     TH1Manager.at(id_pzCutHist) = new MyTH1D("pzCutHist", "p_{Z} Distribution after Selection;p_{Z};dN/dp_{Z}", 100, 0.0, 5.0);
+    TH2Manager.at(id_xywideCPCHist) = new MyTH2D("xywideCPCHist", "Conversion Vertices per mm^{2} bin; x (cm); y (cm)",500,-25.,25.,500,-25.,25.);	
 
     TH1Manager.at(id_numSPCHist) = new MyTH1D("numspcHist", "Number of Sim PC;;Entries per bin",100,-0.5,99.5);
     TH1Manager.at(id_ptSPCHist) = new MyTH1D("ptSPCHist", "Sim. #gamma Conv. p_{T} Distribution;p_{T};1/p_{T} dN/dp_{T}",100,0.0,5.0);
@@ -16,6 +17,8 @@ void histset::init(){
     TH1Manager.at(id_numHGNPCHist) = new MyTH1D("numHGNPCHist", "Number of PC after disambiguation;;Entries per bin",100,-0.5,99.5);
     TH1Manager.at(id_ptHCutHist) = new MyTH1D("ptHCutHist", "p_{T} Distribution after Selection + HGN;p_{T};1/p_{T} dN/dp_{T}", 100, 0.0, 5.0);
     TH1Manager.at(id_pzHCutHist) = new MyTH1D("pzHCutHist", "p_{Z} Distribution after Selection + HGN;p_{Z};dN/dp_{Z}", 100, 0.0, 5.0);
+    TH2Manager.at(id_xywideHGNPCHist) = new MyTH2D("xywideHGNPCHist", "Conversion Vertices per mm^{2} bin; x (cm); y (cm)",500,-25.,25.,500,-25.,25.);
+
 
     TH1Manager.at(id_xplusSPCHist) = new MyTH1D("xplusSPCHist", "Photon pT < 0 GeV; Positron pT Fraction; Entries per 0.01 bin", 100, 0.0, 1.0);
     TH1Manager.at(id_minTkPtSPCHist) = new MyTH1D("minTkPtSPCHist", "Minimum P_{T} of e/p; p_{T} [GeV]; Entries per bin",100,0.0,5.0);
@@ -61,6 +64,25 @@ void histset::init(){
     TH1Manager.at(id_minTkden1) = new MyTH1D("minTkden1", "Sim. PC pair min. p_{T};p_{T} [GeV];Entries per bin",40,0.0,2.0);
     TH1Manager.at(id_Rden1) = new MyTH1D("Rden1", "Sim. PC Radius;R [cm];Entries per bin",100,0.,10);
     TH1Manager.at(id_Rwideden1) = new MyTH1D("Rwideden1","Sim. PC Radius;R [cm]; Entries per bin",250,0.,25.);
+
+
+    //sectors
+    TH1Manager.at(id_rnum_s1) = new MyTH1D("rnum_s1","Reco. PC matched to Sim. BG Radius section 1;R [cm];Entries per bin", 1,0.,1.);
+    TH1Manager.at(id_rnum_s2) = new MyTH1D("rnum_s2","Reco. PC matched to Sim. BG Radius section 2;R [cm];Entries per bin", 1,0.,1.);
+    TH1Manager.at(id_rnum_s3) = new MyTH1D("rnum_s3","Reco. PC matched to Sim. BG Radius section 3;R [cm];Entries per bin", 1,0.,1.);
+    TH1Manager.at(id_rnum_s4) = new MyTH1D("rnum_s4","Reco. PC matched to Sim. BG Radius section 4;R [cm];Entries per bin", 1,0.,1.);
+    TH1Manager.at(id_rnum_s5) = new MyTH1D("rnum_s5","Reco. PC matched to Sim. BG Radius section 5;R [cm];Entries per bin", 1,0.,1.);
+
+    TH1Manager.at(id_rden_s1) = new MyTH1D("rden_s1", "Sim. PC Radius section 1;R [cm];Entries per bin",1,0.,1.);
+    TH1Manager.at(id_rden_s2) = new MyTH1D("rden_s2", "Sim. PC Radius section 2;R [cm];Entries per bin",1,0.,1.);
+    TH1Manager.at(id_rden_s3) = new MyTH1D("rden_s3", "Sim. PC Radius section 3;R [cm];Entries per bin",1,0.,1.);
+    TH1Manager.at(id_rden_s4) = new MyTH1D("rden_s4", "Sim. PC Radius section 4;R [cm];Entries per bin",1,0.,1.);	
+    TH1Manager.at(id_rden_s5) = new MyTH1D("rden_s5", "Sim. PC Radius section 5;R [cm];Entries per bin",1,0.,1.);
+
+    TH1Manager.at(id_pcScutflow) = new MyTH1D("pcScutflow","Reco. PC matched to Sim. PC Cutflow;cuts;Entries per bin",10,-0.5,9.5);
+    TH1Manager.at(id_pcBcutflow) = new MyTH1D("pcBcutflow","Reco. PC matched to Sim. BG Cutflow;cuts;Entries per bin",10,-0.5,9.5);
+    TH1Manager.at(id_pcUcutflow) = new MyTH1D("pcUcutflow","Reco. PC Unmatched Cutflow;cuts;Entries per bin",10,-0.5,9.5);
+
 
 // init TH2D
     TH2Manager.at(id_xyHist) = new MyTH2D("xyHist", "Conversion Vertices per mm^{2} bin; x (cm); y (cm)",200,-10.,10.,200,-10.,10.);

@@ -44,10 +44,25 @@
 		id_minTkden1,
 		id_Rden1,
 		id_Rwideden1,
+		id_rnum_s1,
+		id_rnum_s2,
+		id_rnum_s3,
+		id_rnum_s4,
+		id_rnum_s5,
+		id_rden_s1,
+		id_rden_s2,
+		id_rden_s3,
+		id_rden_s4,
+		id_rden_s5,
+		id_pcScutflow,
+		id_pcBcutflow,
+		id_pcUcutflow,
             numTH1Hist};
        
 	enum th2d_ids{
 		id_xyHist,
 		id_xywideHist,
-		id_rphiHist, 
+		id_rphiHist,
+	        id_xywideCPCHist,
+		id_xywideHGNPCHist, 
             numTH2Hist};
