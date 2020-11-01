@@ -504,7 +504,7 @@ void histset::AnalyzeEntry(recosim& s){
 	for(int i=0; i<nSimTrk;i++){
 		if(SimTrk_pdgId[i] == 22){
 			gmask[i] = 1;
-			if(SimTrk_pt[i] > 0.2){
+			if(SimTrk_pt[i] > 0.4){
 
 				gmask[i] = 2;	
 			}
@@ -543,7 +543,7 @@ void histset::AnalyzeEntry(recosim& s){
 	//18<r<25
 	for( int k=0; k<nSimTrk; k++){//gmask is size of sim trk
 	  
-            if(gmask[k] >0){
+            if( gmask[k] == 2){
 		 // std::cout<<"gparentvtxIdx "<<gparentIdx[k]<<" gmaskidx "<< k<< " gchildvtxIdx "<< gchildIdx[k]<<" mask "<<gmask[k]<<std::endl;
 		startIdx = gparentIdx[k];
 		endIdx = gchildIdx[k];
@@ -565,9 +565,9 @@ void histset::AnalyzeEntry(recosim& s){
                
                 THETAG = atan2(GPT,GPZ);
 		
-		if( abs(start_z) < GV.ZCUT && abs(cos(THETAG)) < GV.COSTCUT){
+		if( abs(start_z) < 15 && abs(cos(THETAG)) < GV.COSTCUT){
 
-		if( start_r < 5 ){
+		if( start_r < 1 ){
 			FillTH1(id_gfluxpt_s1, GPT, w);
 			FillTH1(id_ngflux_s1, 0, w);
 			if( end_r < 5 && abs(end_z) <GV.ZCUT ){
@@ -577,7 +577,7 @@ void histset::AnalyzeEntry(recosim& s){
 				FillTH1(id_ngflux_pccut_s1,0,w);
 			}
 		}
-		if( start_r < 9 && end_r > 5){
+		if( start_r < 1 && end_r > 5){
 			FillTH1(id_gfluxpt_s2, GPT, w);
                         FillTH1(id_ngflux_s2, 0, w);
                         if( end_r < 9 && abs(end_z) <GV.ZCUT ){
@@ -588,7 +588,7 @@ void histset::AnalyzeEntry(recosim& s){
                         }
 
 		}
-		if( start_r < 14 && end_r > 9){
+		if( start_r < 1 && end_r > 9){
 			FillTH1(id_gfluxpt_s3, GPT, w);
                         FillTH1(id_ngflux_s3, 0, w);
                         if( end_r < 14 && abs(end_z) <GV.ZCUT ){
@@ -599,7 +599,7 @@ void histset::AnalyzeEntry(recosim& s){
                         }
 
 		}
-		if( start_r < 18 && end_r > 14){
+		if( start_r < 1 && end_r > 14){
 			FillTH1(id_gfluxpt_s4, GPT, w);
                         FillTH1(id_ngflux_s4, 0, w);
                         if( end_r < 18 && abs(end_z) <GV.ZCUT ){
@@ -610,7 +610,7 @@ void histset::AnalyzeEntry(recosim& s){
                         }
 
 		}
-		if( start_r < 25 && end_r > 18){
+		if( start_r < 1 && end_r > 18){
 			FillTH1(id_gfluxpt_s5, GPT, w);
                         FillTH1(id_ngflux_s5, 0, w);
                         if( end_r < 25 && abs(end_z) <GV.ZCUT ){
