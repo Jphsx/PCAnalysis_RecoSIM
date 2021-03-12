@@ -43,9 +43,9 @@ echo "Now in directory "
 pwd
 
 echo "Start execution"
-
+INPUT=$1
 #./runmyanalysis.sh ${VERSION} ${MACRO}
-./runmyanalysis.sh
+./runmyanalysis.sh ${INPUT}
 
 date
 
