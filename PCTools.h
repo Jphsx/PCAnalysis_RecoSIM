@@ -2,6 +2,7 @@
 #include "Hungarian.h"
 #include "TMath.h"
 #include <set>
+#include "TVector3.h"
 
 //////////////////////////////////////////////////////////////
 //
@@ -318,6 +319,295 @@ hgn_pc pc_disambiguation(recosim& s, std::vector<bool> cutmask){
 /////////////////////////////////////////////////////////////////////////////////////////////
 //(2) sim identification
 //
+//photon flux helper function
+
+struct AngleLimits{
+	double R;
+	double A;
+	double thetaStar;
+	double etaStar;
+	double etalow;
+	double etaup;
+	double dphi;
+
+};
+
+AngleLimits GetAngleLimits(double R, double A, double thetaStar){
+	//return (eta,phi)
+	//we compute theta,phi but convert theta to eta
+	//this function assumes dtheta=dphi and the area segment is "square"
+	AngleLimits al;
+	al.R = R;
+	al.A = A;
+	al.thetaStar = thetaStar;
+	double pi = 4*atan2(1,1);
+	//double dpsi = sqrt( (3*A)/(4*R*sin(thetaStar)) );
+	double dpsi = (3*A)/(4*pi*R*sin(thetaStar));	
+	al.dphi=dpsi;
+	double psi_dpsi_up = thetaStar+dpsi;
+	double psi_dpsi_low = thetaStar-dpsi;
+	al.etalow = -log( tan((thetaStar+dpsi)/2) );
+	al.etaup =  -log( tan((thetaStar-dpsi)/2) );
+	al.etaStar = -log( tan((thetaStar)/2));
+	return al;
+}
+
+//photon flux method #2
+class Point{
+	public:
+	
+	double x;
+	double y;
+	double z;
+	double r;
+	double theta;
+	double eta;
+	double phi;
+	Point(double xp, double yp, double zp){
+		x=xp;
+		y=yp;
+		z=zp;
+		PointRTP(xp,yp,zp);
+	}
+	void PointRTP(double xp, double yp, double zp){
+		r = sqrt(xp*xp + yp*yp + zp*zp);
+		phi = atan2(yp,xp);	
+		double pi = 4*atan2(1,1);
+		if (phi < 0) { phi += 2. * pi; }
+		theta = atan2( sqrt(xp*xp + yp*yp) , zp);
+		eta = -log(tan(theta/2.));
+		 
+	}
+	void PrintPoint(){
+		std::cout<<x<<" "<<y<<" "<<z<<" "<<std::endl;
+	}
+};
+class CubeFace{
+	public:
+	Point* p0;//points that create face
+	Point* p1;
+	Point* p2;
+	Point* p3;
+	//constant for equation of plane
+	double d;
+	TVector3* v1;//vector 1 parallel to face
+	TVector3* v2;//vector 2 parallel to face
+	TVector3* n;//normal vector;
+	CubeFace(Point* P0, Point* P1, Point* P2, Point* P3){
+		p0=P0;
+		p1=P1;
+		p2=P2;
+		p3=P3;
+		//perform vector ops
+		TVector3 _v1(p2->x - p0->x, p2->y - p0->y, p2->z - p0->z);
+		TVector3 _v2(p1->x - p0->x, p1->y - p0->y, p1->z - p0->z);
+		TVector3 _n = _v1.Cross(_v2);
+		v1 = new TVector3(_v1);
+		v2 = new TVector3(_v2);
+		n = new TVector3(_n);
+		d = n->x()*p0->x + n->y()*p0->y + n->z()*p0->z;
+	
+	}
+	void PrintFace(){
+		std::cout<<"Points: "<<std::endl;
+		p0->PrintPoint();
+		p1->PrintPoint();
+		p2->PrintPoint();
+		p3->PrintPoint();
+		std::cout<<"Vecs "<<std::endl;
+		v1->Print();
+		v2->Print();
+		n->Print();
+	}
+};
+class Cube{
+	public:
+	std::vector<CubeFace*> faces;
+	Point* corner; //corner is easiest to calculate	
+	double L;//length of a face
+	
+	Point* center;
+	//Point* centerRTP;
+
+	Cube(double l, Point* p){
+		L=l;
+		corner = p;
+		center = new Point( p->x + L/2., p->y + L/2. , p->z + L/2. );
+		//centerRTP = new Point(0,0,0);
+		//centerRTP->PointRTP(center->x, center->y, center->z);
+		//centerRTP = new Point(center->x, center->y, center->z);
+	}
+	void PrintCube(){
+		for(int i=0; i<faces.size(); i++){
+			std::cout<<"Face: "<<i<<std::endl;
+			faces[i]->PrintFace();
+		}
+	}
+	
+};
+
+Cube* buildCube(double x0, double y0, double z0, double L){
+
+	Point* p1 = new Point(x0,y0,z0);
+	Cube* c = new Cube(L, p1);	
+
+	//find all 8 points of the cube
+	
+	Point* p2 = new Point(x0,y0,z0+L);
+	Point* p3 = new Point(x0,y0+L,z0);
+	Point* p4 = new Point(x0,y0+L,z0+L);
+	Point* p5 = new Point(x0+L, y0, z0);
+	Point* p6 = new Point(x0+L,y0,z0+L);
+	Point* p7 = new Point(x0+L, y0+L, z0);
+	Point* p8 = new Point(x0+L, y0+L, z0+L);
+
+	//define faces
+	c->faces.push_back( new CubeFace(p1,p2,p3,p4) );
+	c->faces.push_back( new CubeFace(p2,p6,p4,p8) );
+	c->faces.push_back( new CubeFace(p6,p5,p8,p7) );
+	c->faces.push_back( new CubeFace(p5,p1,p7,p3) );
+	c->faces.push_back( new CubeFace(p1,p2,p6,p5) );
+	c->faces.push_back( new CubeFace(p3,p4,p8,p7) );
+
+	return c;
+}
+bool hasCubeIntersection(Cube* c, double gx, double gy, double gz, double px, double py, double pz ){
+	
+
+	double t;
+	double ndp, ndr0; //n dot p and n dot r0 (r0 is photon vertex)
+	double nx,ny,nz,d;
+	double xint,yint,zint;
+	
+	//determine cube bounds
+	double xlo,xup,ylo,yup,zlo,zup;
+	xlo = c->faces[0]->p1->x;
+	ylo = c->faces[0]->p1->y;
+	zlo = c->faces[0]->p1->z;
+	xup = xlo + c->L;
+	yup = ylo + c->L;
+	zup = zlo + c->L;
+	
+	for(int i=0; i < c->faces.size(); i++){
+
+		
+		nx = c->faces[i]->n->x();
+		ny = c->faces[i]->n->y();
+		nz = c->faces[i]->n->z();	
+		d = c->faces[i]->d;
+		ndp = nx*px + ny*py + nz*pz;
+		if(ndp==0) continue; //no possible intersection go to next face
+	
+		ndr0 = nx*gx + ny*gy + nz*gz;
+	
+		t = (d-ndr0)/ndp; 
+		xint = gx + px*t;
+		yint = gy + py*t;
+		zint = gz + pz*t;
+	
+		if( xlo <= xint && xup >= xint){
+		if( ylo <= yint && yup >= yint){
+		if( zlo <= zint && zup >= zint){
+			//we have box intersection
+			return true;
+		}}}//end box conditions	
+	}
+
+	return false;
+
+}
+
+
+struct sim_g{
+	std::vector<int> g_idx;//index on simtrack of this photon
+	std::vector<int> parent_simvtx_idx; 
+	std::vector<int> parent_simvtx_ptype;
+	std::vector<int> parent_pdg;
+	std::vector<int> endpoint_vtx_idx;
+	
+};
+sim_g GetSimG(recosim& s){
+	sim_g SG;
+
+	std::vector<int> g_idx;
+	std::vector<int> parent_simvtx_idx;
+	std::vector<int> parent_simvtx_ptype;
+	std::vector<int> parent_pdg;
+	std::vector<int> endpoint_vtx_idx;
+	
+	int nSimTrk = (s.SimTrk_simvtx_Idx).GetSize();
+	auto& SimTrk_pdg = s.SimTrk_pdgId;
+	
+	auto& SimVtx_processType = s.SimVtx_processType;
+	auto& SimTrk_simvtx_Idx = s.SimTrk_simvtx_Idx;
+	auto& SimVtx_simtrk_parent_tid = s.SimVtx_simtrk_parent_tid;
+    	auto& SimTrk_trackId = s.SimTrk_trackId;
+	auto& SimTrk_pdgId = s.SimTrk_pdgId;
+
+	int ptype;
+	int pvtxidx;
+	int ptid;
+	int gtid;
+	int gidx;
+
+	//parent/child tracking variables
+	int pidx;
+	int cidx;
+	int cvtxidx;
+	int ppdg;
+
+	//loop over sim tracks, is this pdg == 22?
+	for(int i=0; i<nSimTrk; i++){
+		if( SimTrk_pdg[i] == 22){ // found a photon
+			
+			gidx = i;
+			pvtxidx = SimTrk_simvtx_Idx[i];
+			gtid= SimTrk_trackId[i];
+			ptid= SimVtx_simtrk_parent_tid[pvtxidx];
+			ptype = SimVtx_processType[pvtxidx];
+			cidx = -1;
+			pidx = -1;
+			cvtxidx = -1;
+			ppdg=-999;
+			//reloop over simtracks get parent pdg, and find child/endpoint at the same time
+			for( int j=0; j<nSimTrk; j++){
+				//find child if any
+				if( gtid == SimVtx_simtrk_parent_tid[ SimTrk_simvtx_Idx[j] ] ){
+					cvtxidx = SimTrk_simvtx_Idx[j]; //this is the index to the photon endpoint (of the sim vtx)
+				}						
+				//find the parent and store its pdg
+				if( ptid == SimTrk_trackId[j] ){
+					ppdg = SimTrk_pdgId[j];
+				} 
+
+			}//end j simtrk loop	
+					
+			
+
+			
+
+			g_idx.push_back( gidx );
+			//map out photons ancestry
+			parent_simvtx_idx.push_back( pvtxidx );
+			parent_simvtx_ptype.push_back( ptype );
+			parent_pdg.push_back( ppdg );
+			endpoint_vtx_idx.push_back( cvtxidx );
+			
+			
+		}//end 22 check
+	}//end simtrkloop
+
+	//populate struct and return
+	SG.g_idx = g_idx;
+	SG.parent_simvtx_idx = parent_simvtx_idx;
+	SG.parent_simvtx_ptype = parent_simvtx_ptype;
+	SG.parent_pdg = parent_pdg;
+	SG.endpoint_vtx_idx = endpoint_vtx_idx;
+
+	return SG; 
+		
+}
+
 
 struct sim_pc{
 	

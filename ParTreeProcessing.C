@@ -31,6 +31,8 @@ int main(int argc, char *argv[])
    int nthreads = std::atoi (argv[1]);
    // First enable implicit multi-threading globally, so that the implicit parallelization is on.
    // The parameter of the call specifies the number of threads to use.
+   ROOT::EnableThreadSafety();
+   //ROOT::Math::MinimizerOptions::SetDefaultMinimizer("Minuit2");
    ROOT::EnableImplicitMT(nthreads);
 
    //load up the list of files to be processed
