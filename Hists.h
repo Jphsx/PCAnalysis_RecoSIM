@@ -36,6 +36,12 @@ void histset::init(){
     TH1Manager.at(id_ngPrompt) = new MyTH1D("ngPrompt","N true prompt",1,0.0,1.0);
     TH1Manager.at(id_trueConv) = new MyTH1D("trueConv","N true convs", 40,0.0,20.0);
 
+    //study of BPIX1
+    TH1Manager.at(id_Ng_BP1 ) = new MyTH1D("Ng_BP1", "N prompt photons",1,0.0,1.0);
+    TH1Manager.at(id_Nc_BP1 ) = new MyTH1D("Nc_BP1", "N conv. BPIX1",1,0.0,1.0);
+    //study of BPIX2
+    TH1Manager.at(id_Ng_BP2 ) = new MyTH1D("Ng_BP2", "N prompt photons",1,0.0,1.0);
+    TH1Manager.at(id_Nc_BP2 ) = new MyTH1D("Nc_BP2", "N conv. BPIX2",1,0.0,1.0);
 
     TH1Manager.at(id_nconvPt ) = new MyTH1D("nconvPt","N Conversions; p_{T} (GeV); N_{conv}",6,0.0,6.0);
     TH1Manager.at(id_nconvR ) = new MyTH1D("nconvR","N Conversions; R (cm); N_{conv}",40,0.0,20.0);

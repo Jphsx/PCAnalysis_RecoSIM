@@ -53,8 +53,23 @@ void mcdataplot(){
 	gROOT->ForceStyle();
 	TFile* fmc = TFile::Open("/home/justin/work/research/DPG/3-13-21/PCAnalysis_RecoSIM/pc_ExecutionDirectory/mc_weighted_small/Outfile.root");
 
-	TFile* fdata = TFile::Open("/home/justin/work/research/DPG/3-13-21/PCAnalysis_RecoSIM/RUN_ON_DATA/pc_ExecutionDirectory/data_test/Outfile.root");
+	//TFile* fdata = TFile::Open("/home/justin/work/research/DPG/3-13-21/PCAnalysis_RecoSIM/RUN_ON_DATA/pc_ExecutionDirectory/data_test/Outfile.root");
 
+
+	TH1D* ngbp1 = (TH1D*)fmc->Get("Ng_BP1");
+	TH1D* ngbp2 = (TH1D*)fmc->Get("Ng_BP2");
+	TH1D* ncbp1 = (TH1D*)fmc->Get("Nc_BP1");
+	TH1D* ncbp2 = (TH1D*)fmc->Get("Nc_BP2");
+
+	ncbp1->Divide(ngbp1);
+	ncbp1->Scale(9./7.);
+	ncbp2->Divide(ngbp2);
+	ncbp2->Scale(9./7.);
+	TCanvas* c1 =new TCanvas("bp1","bp1");
+	ncbp1->Draw();
+	TCanvas* c2 =new TCanvas("bp2","bp2");
+	ncbp2->Draw();
+/*
 	//create fgeom hist
 	Float_t Rbins[] = { 1,5,9,13,18,20 };
 	Int_t  binnum = 5;
@@ -79,7 +94,7 @@ void mcdataplot(){
 		if(r1==0)
 		fgeomf->SetBinContent(i,0.);
 	}
-/*
+/////////
 	for(int i=1; i<=fgeomf->GetNbinsX(); i++){
 		double bc = fgeomf->GetBinCenter(i);
 		for(int j=0; j<binnum; j++){
@@ -94,7 +109,7 @@ void mcdataplot(){
 		}		
 	}
 */
-	TH1D* effRf = new TH1D("effRf","fine eff R;R cm",40,0,20);
+/*	TH1D* effRf = new TH1D("effRf","fine eff R;R cm",40,0,20);
 
 	//Efficiency plots
 	TH1D* effPtN =(TH1D*) fmc->Get("effPtN");
@@ -266,4 +281,5 @@ j+1));
 	fout->WriteTObject(c4c);
 	fout->WriteTObject(ctruth);
 	fout->Close();
+*/
 }

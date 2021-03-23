@@ -132,6 +132,7 @@ void histset::AnalyzeEntry(recosim& s){
 	SG =GetSimG(s);
 	//s_g vars
 	double sg_pt,sg_eta,sg_phi, sg_P, sg_gx, sg_gy, sg_gz, sg_Rxy_origin, sg_ex, sg_ey, sg_ez, sg_Rxy_endpt;
+	int exyz_ptype;
 	//min pt acceptance cut
 	double g_minpt = 0.2;//GeV
 	//nbins = 40 from 0 to 20
@@ -154,6 +155,7 @@ void histset::AnalyzeEntry(recosim& s){
 		sg_ex = SimVtx_x[ SG.endpoint_vtx_idx[i] ];
 		sg_ey = SimVtx_y[ SG.endpoint_vtx_idx[i] ];
 		sg_ez = SimVtx_z[ SG.endpoint_vtx_idx[i] ];
+		exyz_ptype = SimVtx_processType[ SG.endpoint_vtx_idx[i] ];
 		sg_Rxy_endpt = sqrt( sg_ex*sg_ex + sg_ey*sg_ey );
 		}else{
 			sg_ex=0;
@@ -161,7 +163,25 @@ void histset::AnalyzeEntry(recosim& s){
 			sg_ez=0;
 			sg_Rxy_endpt = -1;
 		}
-
+		//look at photons with *no* cuts
+		if(sg_Rxy_origin < 0.5){
+		if(abs( sg_gz ) < 1.){
+		//highly transverse
+		if(abs(sg_eta) < 0.5){
+			
+			FillTH1(id_Ng_BP1,0.5,w);
+			FillTH1(id_Ng_BP2,0.5,w);
+			//does this photon convert in bpix 1 or 2??
+			//BPIX1 1,5   BPIX2 5,9	
+			if( sg_Rxy_endpt > 1 && sg_Rxy_endpt < 5 && exyz_ptype == 14){
+				FillTH1(id_Nc_BP1,0.5,w);
+			}
+			if( sg_Rxy_endpt > 5 && sg_Rxy_endpt < 9 && exyz_ptype == 14){
+				FillTH1(id_Nc_BP2,0.5,w);
+			}
+		
+		}}}
+/*
 		//does this sim photon satisfy acceptance cuts?
 		//min energy?
 		if(sg_pt > 2*sqrt( g_minpt*g_minpt - GV.MASS_ELECTRON * GV.MASS_ELECTRON ) ){
@@ -187,7 +207,7 @@ void histset::AnalyzeEntry(recosim& s){
 			bincenter=0;
 			
 		}}}//end g acceptance
-
+*/
 	}
 
 //
@@ -195,7 +215,7 @@ void histset::AnalyzeEntry(recosim& s){
 
 /////////////////////////////////////////?SIM things
 	//get sim pc mask
-	sim_pc SPC;
+	/*sim_pc SPC;
 	SPC = GetSimPC(s);
 
 	int np14 = SPC.p14_key.size();
@@ -248,9 +268,10 @@ void histset::AnalyzeEntry(recosim& s){
 			}}}}
 		}
 	}
-	
+*/
 //////////////////////////////////////////end SIM THINGS
 	//calculate common variables
+/*
 	std::vector<CommonVars> CVs = GetCommonVars(s,false);//note this is mc
 	 	
 	//get cut mask (check numerator cuts)
@@ -312,7 +333,7 @@ void histset::AnalyzeEntry(recosim& s){
 	/////end matching
 
 
-
+*/
 	
 
 }  // End of sub-program
