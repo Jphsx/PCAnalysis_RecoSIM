@@ -65,7 +65,6 @@
     auto eventNumber = *(s.event);
 //    auto nMCPU = *(s.numberOfMC_PUInfo);
     int nMCPU = 0;
-    auto weight = *(s.weight);
 
     auto& PC_E = s.Conv_refittedPair4Momentum_E;
     auto& PC_M = s.Conv_refittedPair4Momentum_M;
@@ -82,7 +81,7 @@
     auto& PC_vTrack1_nBefore = s.Conv_nHitsBeforeVtx_Tk1;
     auto& PC_nSharedHits = s.Conv_nSharedHits;
 
-    auto& SimVtx_processType = s.SimVtx_processType;
+/*    auto& SimVtx_processType = s.SimVtx_processType;
     auto& SimTrk_simvtx_Idx = s.SimTrk_simvtx_Idx;
     auto& SimVtx_simtrk_parent_tid = s.SimVtx_simtrk_parent_tid;
     auto& SimTrk_trackId = s.SimTrk_trackId;
@@ -94,7 +93,6 @@
     auto& SimVtx_z = s.SimVtx_z;
     auto& SimTrk_pdgId = s.SimTrk_pdgId;
     auto& SimTrk_eta = s.SimTrk_eta;
-    auto& SimTrk_phi = s.SimTrk_phi;
     auto& Conv_vtxdl = s.Conv_vtxdl;
     auto& Conv_convVtxIdx = s.Conv_convVtxIdx;
-
+*/

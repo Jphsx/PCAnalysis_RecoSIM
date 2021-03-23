@@ -9,7 +9,7 @@ CODEDIR=$PWD
 
 INPUT=${1-batch_test}
 MACRO=${2-runmacro.py}
-NTHREADS=${3-4}
+NTHREADS=${3-1}
 
 echo "runmyanalysis.sh Input Args"
 echo ${INPUT}

@@ -18,24 +18,14 @@ void histset::init(){
      TH1Manager.at(id_effPtD ) = new MyTH1D("effPtD","Efficiency;p_{T} [GeV];#varepsilon", 6, 0.0, 6.0);
      TH1Manager.at(id_purityPtN ) = new MyTH1D("purityPtN","Purity;p_{T} [GeV];Purity", 6, 0.0, 6.0);
      TH1Manager.at(id_purityPtD ) = new MyTH1D("purityPtD","Purity;p_{T} [GeV];Purity", 6, 0.0, 6.0);
-     
-     Float_t Rbins[] = { 1,5,9,13,18,20 };
-     Int_t  binnum = 5;
- 
-     TH1Manager.at(id_effRN ) = new MyTH1D("effRN","Efficiency;R [cm];#varepsilon",binnum,Rbins);
-     TH1Manager.at(id_effRD ) = new MyTH1D("effRD","Efficiency;R [cm];#varepsilon",binnum,Rbins);
-     TH1Manager.at(id_purityRN ) = new MyTH1D("purityRN","Purity;R [cm];Purity",binnum,Rbins);
-     TH1Manager.at(id_purityRD ) = new MyTH1D("purityRD","Purity;R [cm];Purity",binnum,Rbins);
+     TH1Manager.at(id_effRN ) = new MyTH1D("effRN","Efficiency;R [cm];#varepsilon",40,0.0,20.0);
+     TH1Manager.at(id_effRD ) = new MyTH1D("effRD","Efficiency;R [cm];#varepsilon",40,0.0,20.0);
+     TH1Manager.at(id_purityRN ) = new MyTH1D("purityRN","Purity;R [cm];Purity",40,0.0,20.0);
+     TH1Manager.at(id_purityRD ) = new MyTH1D("purityRD","Purity;R [cm];Purity",40,0.0,20.0);
      TH1Manager.at(id_effXPN ) = new MyTH1D("effXPN","Efficiency;Positron p_{T} fraction X_{+};#varepsilon",10,0.,1.);
      TH1Manager.at(id_effXPD ) = new MyTH1D("effXPD","Efficiency;Positron p_{T} fraction X_{+};#varepsilon",10,0.,1.);
      TH1Manager.at(id_purityXPN ) = new MyTH1D("purityXPN","Purity;Positron p_{T} fraction X_{+};Purity",10,0.,1.);
      TH1Manager.at(id_purityXPD ) = new MyTH1D("purityXPD","Purity;Positron p_{T} fraction X_{+};Purity",10,0.,1.);
-
-    //true geom counts
-    TH1Manager.at(id_trueGeom) = new MyTH1D("trueGeom","N true photons",40,0.0,20.0);
-    TH1Manager.at(id_ngPrompt) = new MyTH1D("ngPrompt","N true prompt",1,0.0,1.0);
-    TH1Manager.at(id_trueConv) = new MyTH1D("trueConv","N true convs", 40,0.0,20.0);
-
 
     TH1Manager.at(id_nconvPt ) = new MyTH1D("nconvPt","N Conversions; p_{T} (GeV); N_{conv}",6,0.0,6.0);
     TH1Manager.at(id_nconvR ) = new MyTH1D("nconvR","N Conversions; R (cm); N_{conv}",40,0.0,20.0);

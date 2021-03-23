@@ -1,14 +1,14 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Wed Apr 22 12:36:23 2020 by ROOT version 6.14/09
+// Mon Mar 15 17:08:14 2021 by ROOT version 6.20/00
 // from TTree Events/Events
-// found on file: ../OutputFiles/SingleMuon2017_numEvent20000.root
+// found on file: defaultout_numEvent100_1.root
 //////////////////////////////////////////////////////////
 
 #ifndef recosim_h
 #define recosim_h
 
-//#include <TROOT.h>
+#include <TROOT.h>
 #include <TChain.h>
 #include <TFile.h>
 #include <TSelector.h>
@@ -17,7 +17,7 @@
 #include <TTreeReaderArray.h>
 
 // Headers needed by this particular selector
-//using namespace std;
+
 
 class recosim : public TSelector {
 public :
@@ -101,14 +101,6 @@ public :
    TTreeReaderArray<Float_t> Conv_vtx_ndof = {fReader, "Conv_vtx_ndof"};
    TTreeReaderArray<Float_t> Conv_vtx_normalizedChi2 = {fReader, "Conv_vtx_normalizedChi2"};
    TTreeReaderArray<Float_t> Conv_zOfPrimaryVertexFromTracks = {fReader, "Conv_zOfPrimaryVertexFromTracks"};
-
-// New variables
-   TTreeReaderArray<Float_t> Conv_Tk0_dPtRel = {fReader, "Conv_Tk0_dPtRel"};
-   TTreeReaderArray<Float_t> Conv_Tk0_dR = {fReader, "Conv_Tk0_dR"};
-   TTreeReaderArray<Float_t> Conv_Tk1_dPtRel = {fReader, "Conv_Tk1_dPtRel"};
-   TTreeReaderArray<Float_t> Conv_Tk1_dR = {fReader, "Conv_Tk1_dR"};
-   TTreeReaderArray<Float_t> Conv_vtxdl = {fReader, "Conv_vtxdl"};
-
    TTreeReaderArray<Int_t> Conv_Tk0_algo = {fReader, "Conv_Tk0_algo"};
    TTreeReaderArray<Int_t> Conv_Tk0_charge = {fReader, "Conv_Tk0_charge"};
    TTreeReaderArray<Int_t> Conv_Tk0_found = {fReader, "Conv_Tk0_found"};
@@ -124,11 +116,6 @@ public :
    TTreeReaderArray<Int_t> Conv_nHitsBeforeVtx_Tk1 = {fReader, "Conv_nHitsBeforeVtx_Tk1"};
    TTreeReaderArray<Int_t> Conv_nSharedHits = {fReader, "Conv_nSharedHits"};
    TTreeReaderArray<Int_t> Conv_nTracks = {fReader, "Conv_nTracks"};
-// New
-   TTreeReaderArray<Int_t> Conv_Tk0_Idx = {fReader, "Conv_Tk0_Idx"};
-   TTreeReaderArray<Int_t> Conv_Tk1_Idx = {fReader, "Conv_Tk1_Idx"};
-   TTreeReaderArray<Int_t> Conv_convVtxIdx = {fReader, "Conv_convVtxIdx"};
-
    TTreeReaderArray<Bool_t> Conv_isConverted = {fReader, "Conv_isConverted"};
    TTreeReaderValue<UInt_t> nPV = {fReader, "nPV"};
    TTreeReaderArray<Float_t> PV_X = {fReader, "PV_X"};
@@ -144,24 +131,6 @@ public :
    TTreeReaderArray<Float_t> PV_ndof = {fReader, "PV_ndof"};
    TTreeReaderArray<Float_t> PV_normalizedChi2 = {fReader, "PV_normalizedChi2"};
 
-// New
-   TTreeReaderValue<UInt_t> nSimTrk = {fReader, "nSimTrk"};
-   TTreeReaderArray<Float_t> SimTrk_charge = {fReader, "SimTrk_charge"};
-   TTreeReaderArray<Float_t> SimTrk_eta = {fReader, "SimTrk_eta"};
-   TTreeReaderArray<Float_t> SimTrk_phi = {fReader, "SimTrk_phi"};
-   TTreeReaderArray<Float_t> SimTrk_pt = {fReader, "SimTrk_pt"};
-   TTreeReaderArray<Int_t> SimTrk_pdgId = {fReader, "SimTrk_pdgId"};
-   TTreeReaderArray<Int_t> SimTrk_simvtx_Idx = {fReader, "SimTrk_simvtx_Idx"};
-   TTreeReaderArray<Int_t> SimTrk_trackId = {fReader, "SimTrk_trackId"};
-   TTreeReaderValue<UInt_t> nSimVtx = {fReader, "nSimVtx"};
-   TTreeReaderArray<Float_t> SimVtx_tof = {fReader, "SimVtx_tof"};
-   TTreeReaderArray<Float_t> SimVtx_x = {fReader, "SimVtx_x"};
-   TTreeReaderArray<Float_t> SimVtx_y = {fReader, "SimVtx_y"};
-   TTreeReaderArray<Float_t> SimVtx_z = {fReader, "SimVtx_z"};
-   TTreeReaderArray<Int_t> SimVtx_processType = {fReader, "SimVtx_processType"};
-   TTreeReaderArray<Int_t> SimVtx_simtrk_parent_tid = {fReader, "SimVtx_simtrk_parent_tid"};
-
-   TTreeReaderValue<float> weight = {fReader,"weight"};
 
    recosim(TTree * /*tree*/ =0) { }
    virtual ~recosim() { }
@@ -179,8 +148,7 @@ public :
    virtual void    SlaveTerminate();
    virtual void    Terminate();
 
-// VERY IMPORTANT TO COMMENT THIS OUT WHEN USED COMPILED ...
-//   ClassDef(convsel,0);
+   //ClassDef(recosim,0);
 
 };
 
