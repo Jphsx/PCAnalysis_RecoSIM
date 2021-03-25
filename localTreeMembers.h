@@ -65,7 +65,7 @@
     auto eventNumber = *(s.event);
 //    auto nMCPU = *(s.numberOfMC_PUInfo);
     int nMCPU = 0;
-    auto weight = *(s.weight);
+  //  auto weight = *(s.weight);
 
     auto& PC_E = s.Conv_refittedPair4Momentum_E;
     auto& PC_M = s.Conv_refittedPair4Momentum_M;

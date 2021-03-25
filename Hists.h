@@ -32,9 +32,16 @@ void histset::init(){
      TH1Manager.at(id_purityXPD ) = new MyTH1D("purityXPD","Purity;Positron p_{T} fraction X_{+};Purity",10,0.,1.);
 
     //true geom counts
-    TH1Manager.at(id_trueGeom) = new MyTH1D("trueGeom","N true photons",40,0.0,20.0);
+    TH1Manager.at(id_trueGeom) = new MyTH1D("trueGeom","N true photons",20,0.0,20.0);
     TH1Manager.at(id_ngPrompt) = new MyTH1D("ngPrompt","N true prompt",1,0.0,1.0);
-    TH1Manager.at(id_trueConv) = new MyTH1D("trueConv","N true convs", 40,0.0,20.0);
+    TH1Manager.at(id_trueConv) = new MyTH1D("trueConv","N true convs", 20,0.0,20.0);
+    
+    TH1Manager.at(id_trueGeom_Coarse) = new MyTH1D("trueGeom_Coarse","N true photons",binnum, Rbins);
+    TH1Manager.at(id_trueConv_Coarse) = new MyTH1D("trueConv_Coarse","N true convs",binnum,Rbins);
+    TH1Manager.at(id_nconvR_match) = new MyTH1D("nconvR_match","N matched reco conv",20,0.0,20.0);
+    TH1Manager.at(id_nconvR_all) = new MyTH1D("nconvR_all","N incl reco conv",20,0.0,20.0);
+    TH1Manager.at(id_nconvR_match_Coarse) = new MyTH1D("nconvR_match_Coarse","",binnum, Rbins);
+    TH1Manager.at(id_nconvR_all_Coarse) = new MyTH1D("nconvR_all_Coarse","",binnum,Rbins);
 
     //study of BPIX1
     TH1Manager.at(id_Ng_BP1 ) = new MyTH1D("Ng_BP1", "N prompt photons",1,0.0,1.0);
@@ -44,11 +51,11 @@ void histset::init(){
     TH1Manager.at(id_Nc_BP2 ) = new MyTH1D("Nc_BP2", "N conv. BPIX2",1,0.0,1.0);
 
     TH1Manager.at(id_nconvPt ) = new MyTH1D("nconvPt","N Conversions; p_{T} (GeV); N_{conv}",6,0.0,6.0);
-    TH1Manager.at(id_nconvR ) = new MyTH1D("nconvR","N Conversions; R (cm); N_{conv}",40,0.0,20.0);
+    TH1Manager.at(id_nconvR ) = new MyTH1D("nconvR","N Conversions; R (cm); N_{conv}",20,0.0,20.0);
     TH1Manager.at(id_nconvXP ) = new MyTH1D("nconvXP","N Conversion; Positron p_{T} fraction X_{+}; N_{conv}",10,0.,1.);
 
     TH1Manager.at(id_nconvPt_fake) = new MyTH1D("nconvPt_fake", "N Fake Conversions;p_{T} (GeV); N_{conv}",6,0.0,6.0);
-    TH1Manager.at(id_nconvR_fake) = new MyTH1D("nconvR_fake","N Fake Conversions;R (cm);N_{conv}",40,0.0,20.0);
+    TH1Manager.at(id_nconvR_fake) = new MyTH1D("nconvR_fake","N Fake Conversions;R (cm);N_{conv}",20,0.0,20.0);
     TH1Manager.at(id_nconvXP_fake) = new MyTH1D("nconvXP_fake","N Fake Conversions;Positron p_{T} fraction X_{+}",10,0.,1.);
 
 	

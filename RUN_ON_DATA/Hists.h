@@ -28,7 +28,7 @@ void histset::init(){
      TH1Manager.at(id_purityXPD ) = new MyTH1D("purityXPD","Purity;Positron p_{T} fraction X_{+};Purity",10,0.,1.);
 
     TH1Manager.at(id_nconvPt ) = new MyTH1D("nconvPt","N Conversions; p_{T} (GeV); N_{conv}",6,0.0,6.0);
-    TH1Manager.at(id_nconvR ) = new MyTH1D("nconvR","N Conversions; R (cm); N_{conv}",40,0.0,20.0);
+    TH1Manager.at(id_nconvR ) = new MyTH1D("nconvR","N Conversions; R (cm); N_{conv}",20,0.0,20.0);
     TH1Manager.at(id_nconvXP ) = new MyTH1D("nconvXP","N Conversion; Positron p_{T} fraction X_{+}; N_{conv}",10,0.,1.);
 
     TH1Manager.at(id_nconvPt_fake) = new MyTH1D("nconvPt_fake", "N Fake Conversions;p_{T} (GeV); N_{conv}",6,0.0,6.0);

@@ -161,7 +161,7 @@ public :
    TTreeReaderArray<Int_t> SimVtx_processType = {fReader, "SimVtx_processType"};
    TTreeReaderArray<Int_t> SimVtx_simtrk_parent_tid = {fReader, "SimVtx_simtrk_parent_tid"};
 
-   TTreeReaderValue<float> weight = {fReader,"weight"};
+ //  TTreeReaderValue<float> weight = {fReader,"weight"};
 
    recosim(TTree * /*tree*/ =0) { }
    virtual ~recosim() { }

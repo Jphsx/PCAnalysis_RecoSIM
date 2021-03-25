@@ -51,11 +51,115 @@ void mcdataplot(){
 	
 	setTDRStyle();
 	gROOT->ForceStyle();
+	//TFile* fmc = TFile::Open("/home/justin/work/research/DPG/3-13-21/PCAnalysis_RecoSIM/pc_ExecutionDirectory/mc_weighted/Outfile.root");
+//	TFile* fmc = TFile::Open("/home/justin/work/research/DPG/3-13-21/PCAnalysis_RecoSIM/pc_ExecutionDirectory/local_test/Outfile.root");
 	TFile* fmc = TFile::Open("/home/justin/work/research/DPG/3-13-21/PCAnalysis_RecoSIM/pc_ExecutionDirectory/mc_weighted_small/Outfile.root");
+	TFile* fdata = TFile::Open("/home/justin/work/research/DPG/3-13-21/PCAnalysis_RecoSIM/RUN_ON_DATA/pc_ExecutionDirectory/data_test/Outfile.root");
+	TFile* fdata2 = TFile::Open("/home/justin/work/research/DPG/3-13-21/PCAnalysis_RecoSIM/RUN_ON_DATA/pc_ExecutionDirectory/data_test2/Outfile.root");
 
-	//TFile* fdata = TFile::Open("/home/justin/work/research/DPG/3-13-21/PCAnalysis_RecoSIM/RUN_ON_DATA/pc_ExecutionDirectory/data_test/Outfile.root");
+	TFile* fmc1 = TFile::Open("/home/justin/work/research/DPG/3-23-21/PCAnalysis_RecoSIM/pc_ExecutionDirectory/save/mc_weighted_L1neventweight.root");
+	TFile* fmc2 = TFile::Open("/home/justin/work/research/DPG/3-23-21/PCAnalysis_RecoSIM/pc_ExecutionDirectory/save/mc_weighted_bias0Beventweight.root");
+
+	TH1D* trueGeom = (TH1D*)fmc->Get("trueGeom");
+	TH1D* trueConv = (TH1D*)fmc->Get("trueConv");
+	TCanvas* c1 = new TCanvas("true1");
+	TH1D* trueConv_ = (TH1D*)trueConv->Clone();
+	trueConv_->Divide(trueGeom);
+	trueConv_->Scale(9./7.);
+	trueConv_->SetTitle(";R [cm]; x/x0");
+	trueConv_->Draw("HIST E");
+	
+	TH1D* trueGeom_C = (TH1D*)fmc->Get("trueGeom_Coarse");
+	TH1D* trueConv_C = (TH1D*)fmc->Get("trueConv_Coarse");
+	TCanvas* c2 = new TCanvas("trueC");
+	TH1D* trueConv_C_ = (TH1D*) trueConv_C->Clone();
+	trueConv_C_->Divide(trueGeom_C);
+	trueConv_C_->Scale(9./7.);
+	trueConv_C_->Draw("HIST E");
 
 
+	TH1D* nconvR_match = (TH1D*)fmc->Get("nconvR_match");
+	TH1D* nconvR_match_eff = (TH1D*)nconvR_match->Clone();
+	nconvR_match_eff->Divide(trueConv);
+	double r,n;
+	for(int i=1; i<=nconvR_match_eff->GetNbinsX(); i++){
+		r = nconvR_match_eff->GetBinContent(i);
+		n = trueConv->GetBinContent(i);
+		nconvR_match_eff->SetBinError(i, sqrt( (r*(1-r))/n ));
+	}
+	nconvR_match_eff->Draw();
+
+	TH1D* nconvR_match_C = (TH1D*)fmc->Get("nconvR_match_Coarse");
+	nconvR_match_C->Divide(trueConv_C);
+	nconvR_match_C->SetLineColor(kRed);
+	nconvR_match_C->Draw("SAMES");
+
+	TCanvas* c3 = new TCanvas("x0_","x0_");
+	nconvR_match->Divide(trueGeom);
+	nconvR_match->Divide(nconvR_match_eff);
+	nconvR_match->Scale(9./7.);
+	nconvR_match->Draw("HIST E");
+
+/*
+	TH1D* nconvR_data = (TH1D*) fdata->Get("nconvR");
+	nconvR_data->Draw("HIST E");
+	//nconvR_data->Divide(nconvR_match_eff);
+	nconvR_data->Divide(trueGeom);
+	nconvR_data->Scale(9./7.);
+	//nconvR_data->Draw("HIST E");	
+
+
+	//num hgn pc hist
+	TH1D* nhgnpc_data = (TH1D*) fdata->Get("numHGNPCHist");
+	TH1D* nhgnpc_mc = (TH1D*) fmc->Get("numHGNPCHist");
+	TCanvas* c4 = new TCanvas("pccounts","pccounts" );
+	nhgnpc_data->Draw("HIST E");
+	nhgnpc_mc->Draw("HIST SAME E");
+
+
+	TH1D* npc_data1 = (TH1D*) fdata->Get("numpcHist");
+	TH1D* npc_mc = (TH1D*) fmc->Get("numpcHist");
+	TH1D* npc_data2 = (TH1D*) fdata2->Get("numpcHist");
+
+	npc_data1->Scale(1./npc_data1->Integral());
+	npc_mc->Scale(1./npc_mc->Integral());
+	npc_data2->Scale(1./npc_data2->Integral());
+
+	npc_data1->SetLineColor(kBlue);
+	npc_mc->SetLineColor(kRed);
+	npc_data2->SetLineColor(kBlack);
+	npc_data1->SetTitle("L1 Data;num PC");
+	npc_data2->SetTitle("2018B Data");
+	npc_mc->SetTitle("RecoSIM MC");
+
+	TCanvas* c5 = new TCanvas("rawpc","rawpc");
+	npc_data1->Draw("HIST E");
+	npc_mc->Draw("HIST SAME E");
+	npc_data2->Draw("HIST SAME E");
+	c5->BuildLegend();
+/*
+	TCanvas* c6= new TCanvas("nconvr_comp","nconvr_comp");
+	TH1D* nconvR_data_1 = (TH1D*) fdata->Get("nconvR");
+	TH1D* nconvR_data_2 = (TH1D*) fdata2->Get("nconvR");
+	TH1D* nconvR_mc_1 = (TH1D*) fmc1->Get("nconvR");
+	TH1D* nconvR_mc_2 = (TH1D*) fmc2->Get("nconvR");
+	nconvR_data_1->SetLineColor(kBlue);
+	nconvR_mc_1->SetLineColor(kMagenta);
+	nconvR_data_2->SetLineColor(kRed);
+	nconvR_mc_2->SetLineColor(kOrange);
+//	nconvR_data_1->Draw("HIST E");
+//	nconvR_mc_1->Draw("HIST E SAME");
+	nconvR_data_2->Draw("HIST E ");
+	nconvR_mc_2->Draw("HIST E SAME");
+	nconvR_data_1->Draw("HIST SAME E");
+	 nconvR_mc_1->Draw("HIST E SAME");
+*/
+	
+
+	TFile* fout = new TFile("hists.root","RECREATE");
+//	fout->WriteTObject(trueConv);
+//	fout->WriteTObject(trueConv_C);
+/*
 	TH1D* ngbp1 = (TH1D*)fmc->Get("Ng_BP1");
 	TH1D* ngbp2 = (TH1D*)fmc->Get("Ng_BP2");
 	TH1D* ncbp1 = (TH1D*)fmc->Get("Nc_BP1");
@@ -69,6 +173,9 @@ void mcdataplot(){
 	ncbp1->Draw();
 	TCanvas* c2 =new TCanvas("bp2","bp2");
 	ncbp2->Draw();
+*/
+
+
 /*
 	//create fgeom hist
 	Float_t Rbins[] = { 1,5,9,13,18,20 };

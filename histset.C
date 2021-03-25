@@ -108,10 +108,10 @@ void histset::AnalyzeEntry(recosim& s){
 	
 	double w; 
 	#include "localTreeMembers.h"     //All the variable incantations needed
-	double mc2data_w = 0.883927;
-	double npvweight = weight;
-	w = npvweight * mc2data_w;
-//	w=1.;
+//	double mc2data_w = 0.883927;
+//	double npvweight = weight;
+//	w = npvweight * mc2data_w;
+	w=12.05311;
 
 	FillTH1( id_numpcHist, numberOfPC,w);
 
@@ -136,12 +136,15 @@ void histset::AnalyzeEntry(recosim& s){
 	//min pt acceptance cut
 	double g_minpt = 0.2;//GeV
 	//nbins = 40 from 0 to 20
-	int nGbins = 40.;
+	int nGbins = 20.;
 	double gBinEnd = 20.;
 	double gBinWidth = gBinEnd/ ((double)nGbins);
 	double gBinStart = 0.;
 	double binLow,bincenter;
 	binLow = gBinStart;
+
+	Float_t Rbins[] = { 1,5,9,13,18,20 };
+	Int_t  binnum = 5;
 	for(int i=0; i< SG.g_idx.size(); i++){	
 		sg_pt = SimTrk_pt[ SG.g_idx[i] ];
 		sg_eta = SimTrk_eta[ SG.g_idx[i] ];
@@ -163,6 +166,7 @@ void histset::AnalyzeEntry(recosim& s){
 			sg_ez=0;
 			sg_Rxy_endpt = -1;
 		}
+		/*
 		//look at photons with *no* cuts
 		if(sg_Rxy_origin < 0.5){
 		if(abs( sg_gz ) < 1.){
@@ -181,41 +185,68 @@ void histset::AnalyzeEntry(recosim& s){
 			}
 		
 		}}}
-/*
+		*/
+//
 		//does this sim photon satisfy acceptance cuts?
 		//min energy?
-		if(sg_pt > 2*sqrt( g_minpt*g_minpt - GV.MASS_ELECTRON * GV.MASS_ELECTRON ) ){
+		if(sg_pt > 2*sqrt( g_minpt*g_minpt + GV.MASS_ELECTRON * GV.MASS_ELECTRON ) ){
 		//origin less than z<25?
 		if( abs(sg_gz) < 25.){
 		//cos theta< 0.85?
 		if( abs( sg_eta ) < 1.25615 ){
+		//if( sg_Rxy_origin < 0.5 ){
 			//now check if the photon is created before radial point and ends after (if it has an endpoint)
-			if( sg_Rxy_origin < 1.0 ){
-				FillTH1(id_ngPrompt,0.5,w);
-			}
+			//if( sg_Rxy_origin < 1.0 ){
+			//	FillTH1(id_ngPrompt,0.5,w);
+			//}
+		
 			
 			for(int j=1; j<=nGbins; j++){
-				bincenter = binLow + gBinWidth/2.;
+				bincenter = binLow + gBinWidth;
 				//does the ph oton start before and end after this bin center?
-				if(sg_Rxy_origin < bincenter ){
+				if(sg_Rxy_origin < binLow ){
+		//		if(sg_Rxy_origin < 1.0){
 				if(sg_Rxy_endpt == -1 || sg_Rxy_endpt > bincenter){
-					FillTH1(id_trueGeom, bincenter, w);		
+					FillTH1(id_trueGeom, bincenter, w);	
 				}}
 				binLow += gBinWidth;
 			}	
 			binLow = gBinStart;
 			bincenter=0;
+// Float_t Rbins[] = { 1,5,9,13,18,20 };
+  //    Int_t  binnum = 5;
+
+			//coarse binning
+			for(int j=0; j<binnum; j++){
+				binLow = Rbins[j];
+				bincenter = Rbins[j+1];
+				if( sg_Rxy_origin < binLow ){
+				if( sg_Rxy_endpt == -1 || sg_Rxy_endpt > bincenter ){
+					FillTH1(id_trueGeom_Coarse, (binLow+bincenter)/2. , w);
+				}}
+			}
+			binLow = gBinStart;
+			bincenter=0;
 			
-		}}}//end g acceptance
-*/
+
+		if( sg_Rxy_endpt != -1 ){
+		if( exyz_ptype==14 ){
+			FillTH1(id_trueConv, sg_Rxy_endpt, w);
+			FillTH1(id_trueConv_Coarse, sg_Rxy_endpt, w);
+		}}
+			
+		}}}//}//end g acceptance
+
 	}
 
 //
 /////////////////////////////////////////
 
 /////////////////////////////////////////?SIM things
+/*
+
 	//get sim pc mask
-	/*sim_pc SPC;
+	sim_pc SPC;
 	SPC = GetSimPC(s);
 
 	int np14 = SPC.p14_key.size();
@@ -259,7 +290,7 @@ void histset::AnalyzeEntry(recosim& s){
 					ptm = SimTrk_pt[t1idx];
 					ptp = SimTrk_pt[t2idx];
 				}
-				else{
+				else{	ptm
 					ptm = SimTrk_pt[t2idx];
 					ptp = SimTrk_pt[t1idx];
 				}
@@ -271,7 +302,7 @@ void histset::AnalyzeEntry(recosim& s){
 */
 //////////////////////////////////////////end SIM THINGS
 	//calculate common variables
-/*
+
 	std::vector<CommonVars> CVs = GetCommonVars(s,false);//note this is mc
 	 	
 	//get cut mask (check numerator cuts)
@@ -303,7 +334,8 @@ void histset::AnalyzeEntry(recosim& s){
 			FillTH1(id_purityPtN, CVs[pcidx].pt, w);
 			FillTH1(id_purityRN, CVs[pcidx].radius, w);
 			FillTH1(id_purityXPN, CVs[pcidx].xplus, w);
-
+			FillTH1(id_nconvR_match, CVs[pcidx].radius, w);
+			FillTH1(id_nconvR_match_Coarse, CVs[pcidx].radius, w);
 		//	FillTH1(id_nconvPt, CVs[pcidx].pt, w);
 		//	FillTH1(id_nconvR, CVs[pcidx].radius, w);
 		//	FillTH1(id_nconvXP, CVs[pcidx].xplus, w);
@@ -314,6 +346,8 @@ void histset::AnalyzeEntry(recosim& s){
 		FillTH1(id_nconvPt, CVs[pcidx].pt, w);
                 FillTH1(id_nconvR, CVs[pcidx].radius, w);
                 FillTH1(id_nconvXP, CVs[pcidx].xplus, w);
+		FillTH1(id_nconvR_all, CVs[pcidx].radius, w);
+		FillTH1(id_nconvR_all_Coarse, CVs[pcidx].radius, w);
 
 		if(Conv_vtxdl[pcidx] > matchcut){
 			FillTH1(id_nconvPt_fake, CVs[pcidx].pt, w);
@@ -333,7 +367,7 @@ void histset::AnalyzeEntry(recosim& s){
 	/////end matching
 
 
-*/
+
 	
 
 }  // End of sub-program
