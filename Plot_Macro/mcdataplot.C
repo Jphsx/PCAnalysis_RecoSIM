@@ -61,7 +61,8 @@ void mcdataplot(){
 	TFile* fmc2 = TFile::Open("/home/justin/work/research/DPG/3-23-21/PCAnalysis_RecoSIM/pc_ExecutionDirectory/save/mc_weighted_bias0Beventweight.root");
 
 	TH1D* trueGeom = (TH1D*)fmc->Get("trueGeom");
-	TH1D* trueConv = (TH1D*)fmc->Get("trueConv");
+	trueGeom->Draw();
+	/*	TH1D* trueConv = (TH1D*)fmc->Get("trueConv");
 	TCanvas* c1 = new TCanvas("true1");
 	TH1D* trueConv_ = (TH1D*)trueConv->Clone();
 	trueConv_->Divide(trueGeom);
@@ -100,7 +101,7 @@ void mcdataplot(){
 	nconvR_match->Scale(9./7.);
 	nconvR_match->Draw("HIST E");
 
-/*
+
 	TH1D* nconvR_data = (TH1D*) fdata->Get("nconvR");
 	nconvR_data->Draw("HIST E");
 	//nconvR_data->Divide(nconvR_match_eff);
@@ -137,7 +138,7 @@ void mcdataplot(){
 	npc_mc->Draw("HIST SAME E");
 	npc_data2->Draw("HIST SAME E");
 	c5->BuildLegend();
-/*
+
 	TCanvas* c6= new TCanvas("nconvr_comp","nconvr_comp");
 	TH1D* nconvR_data_1 = (TH1D*) fdata->Get("nconvR");
 	TH1D* nconvR_data_2 = (TH1D*) fdata2->Get("nconvR");
@@ -155,11 +156,11 @@ void mcdataplot(){
 	 nconvR_mc_1->Draw("HIST E SAME");
 */
 	
-
+/*
 	TFile* fout = new TFile("hists.root","RECREATE");
 //	fout->WriteTObject(trueConv);
 //	fout->WriteTObject(trueConv_C);
-/*
+
 	TH1D* ngbp1 = (TH1D*)fmc->Get("Ng_BP1");
 	TH1D* ngbp2 = (TH1D*)fmc->Get("Ng_BP2");
 	TH1D* ncbp1 = (TH1D*)fmc->Get("Nc_BP1");
@@ -170,11 +171,13 @@ void mcdataplot(){
 	ncbp2->Divide(ngbp2);
 	ncbp2->Scale(9./7.);
 	TCanvas* c1 =new TCanvas("bp1","bp1");
+	ncbp1->SetTitle(";;x/x0 BPIX1");
 	ncbp1->Draw();
 	TCanvas* c2 =new TCanvas("bp2","bp2");
+	ncbp2->SetTitle(";;x/x0 BPIX2");
 	ncbp2->Draw();
-*/
 
+*/
 
 /*
 	//create fgeom hist

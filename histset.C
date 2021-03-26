@@ -111,8 +111,8 @@ void histset::AnalyzeEntry(recosim& s){
 //	double mc2data_w = 0.883927;
 //	double npvweight = weight;
 //	w = npvweight * mc2data_w;
-	w=12.05311;
-
+//	w=12.05311;
+	w=1.;
 	FillTH1( id_numpcHist, numberOfPC,w);
 
 	for(int i=0; i<numberOfPC; i++){
@@ -166,7 +166,7 @@ void histset::AnalyzeEntry(recosim& s){
 			sg_ez=0;
 			sg_Rxy_endpt = -1;
 		}
-		/*
+		
 		//look at photons with *no* cuts
 		if(sg_Rxy_origin < 0.5){
 		if(abs( sg_gz ) < 1.){
@@ -185,7 +185,7 @@ void histset::AnalyzeEntry(recosim& s){
 			}
 		
 		}}}
-		*/
+		
 //
 		//does this sim photon satisfy acceptance cuts?
 		//min energy?
