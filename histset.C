@@ -101,6 +101,7 @@ void histset::WriteHist(){
            outfile->WriteObject(h, h->GetName() );
         }
 	}
+	outfile->Close();
 }
 
 void histset::AnalyzeEntry(recosim& s){

@@ -319,6 +319,100 @@ hgn_pc pc_disambiguation(recosim& s, std::vector<bool> cutmask){
 //(2) sim identification
 //
 
+
+struct sim_g{
+	std::vector<int> g_idx;//index on simtrack of this photon
+	std::vector<int> parent_simvtx_idx; 
+	std::vector<int> parent_simvtx_ptype;
+	std::vector<int> parent_pdg;
+	std::vector<int> endpoint_vtx_idx;
+	
+};
+sim_g GetSimG(recosim& s){
+	sim_g SG;
+
+	std::vector<int> g_idx;
+	std::vector<int> parent_simvtx_idx;
+	std::vector<int> parent_simvtx_ptype;
+	std::vector<int> parent_pdg;
+	std::vector<int> endpoint_vtx_idx;
+	
+	int nSimTrk = (s.SimTrk_simvtx_Idx).GetSize();
+	auto& SimTrk_pdg = s.SimTrk_pdgId;
+	
+	auto& SimVtx_processType = s.SimVtx_processType;
+	auto& SimTrk_simvtx_Idx = s.SimTrk_simvtx_Idx;
+	auto& SimVtx_simtrk_parent_tid = s.SimVtx_simtrk_parent_tid;
+    	auto& SimTrk_trackId = s.SimTrk_trackId;
+	auto& SimTrk_pdgId = s.SimTrk_pdgId;
+
+	int ptype;
+	int pvtxidx;
+	int ptid;
+	int gtid;
+	int gidx;
+
+	//parent/child tracking variables
+	int pidx;
+	int cidx;
+	int cvtxidx;
+	int ppdg;
+
+	//loop over sim tracks, is this pdg == 22?
+	for(int i=0; i<nSimTrk; i++){
+		if( SimTrk_pdg[i] == 22){ // found a photon
+			
+			gidx = i;
+			pvtxidx = SimTrk_simvtx_Idx[i];
+			gtid= SimTrk_trackId[i];
+			ptid= SimVtx_simtrk_parent_tid[pvtxidx];
+			ptype = SimVtx_processType[pvtxidx];
+			cidx = -1;
+			pidx = -1;
+			cvtxidx = -1;
+			ppdg=-999;
+			//reloop over simtracks get parent pdg, and find child/endpoint at the same time
+			for( int j=0; j<nSimTrk; j++){
+				//find child if any
+				if( gtid == SimVtx_simtrk_parent_tid[ SimTrk_simvtx_Idx[j] ] ){
+					cvtxidx = SimTrk_simvtx_Idx[j]; //this is the index to the photon endpoint (of the sim vtx)
+				}						
+				//find the parent and store its pdg
+				if( ptid == SimTrk_trackId[j] ){
+					ppdg = SimTrk_pdgId[j];
+				} 
+
+			}//end j simtrk loop	
+					
+			
+
+			
+
+			g_idx.push_back( gidx );
+			//map out photons ancestry
+			parent_simvtx_idx.push_back( pvtxidx );
+			parent_simvtx_ptype.push_back( ptype );
+			parent_pdg.push_back( ppdg );
+			endpoint_vtx_idx.push_back( cvtxidx );
+			
+			
+		}//end 22 check
+	}//end simtrkloop
+
+	//populate struct and return
+	SG.g_idx = g_idx;
+	SG.parent_simvtx_idx = parent_simvtx_idx;
+	SG.parent_simvtx_ptype = parent_simvtx_ptype;
+	SG.parent_pdg = parent_pdg;
+	SG.endpoint_vtx_idx = endpoint_vtx_idx;
+
+	return SG; 
+		
+}
+
+
+
+
 struct sim_pc{
 	
 	std::vector<int> sim_mask;
