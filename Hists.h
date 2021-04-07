@@ -43,6 +43,16 @@ void histset::init(){
     TH1Manager.at(id_nconvR_match_Coarse) = new MyTH1D("nconvR_match_Coarse","",binnum, Rbins);
     TH1Manager.at(id_nconvR_all_Coarse) = new MyTH1D("nconvR_all_Coarse","",binnum,Rbins);
 
+    //testing photon versus simvtx loop
+    TH1Manager.at(id_trueConv_simvtx) = new MyTH1D("trueConv_simvtx","N true convs", 20,0.0,20.0);
+    TH1Manager.at(id_trueConv_simvtx_Coarse) = new MyTH1D("trueConv_simvtx_Coarse","N true convs",binnum,Rbins);
+    //photon checks
+    //if a photon passes min energy and converts, what is min pt distribution?	  
+    TH1Manager.at(id_minpt_gtrkpc) = new MyTH1D("minpt_gtrkpc","min pt of converted sim photon that passes cuts;p_{T} GeV",30,0,3.0);
+    //count the number of photons that convert, pass g pt req, and have tracks that do not pass the pt cut
+    TH1Manager.at(id_trueConv_gPass_trkFail) = new MyTH1D("trueConv_gPass_trkFail","n Convs that pass gpt but fail min trk pt;R [GeV]",20,0.0,20.0);
+    TH1Manager.at(id_trueConv_gPass_trkFail_Coarse) = new MyTH1D("trueConv_gPass_trkFail_Coarse","n Convs that pass gpt but fail min trk pt;R [GeV]",binnum,Rbins);
+
     //study of BPIX1
     TH1Manager.at(id_Ng_BP1 ) = new MyTH1D("Ng_BP1", "N prompt photons",1,0.0,1.0);
     TH1Manager.at(id_Nc_BP1 ) = new MyTH1D("Nc_BP1", "N conv. BPIX1",1,0.0,1.0);

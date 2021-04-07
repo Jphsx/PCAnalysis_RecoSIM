@@ -326,6 +326,10 @@ struct sim_g{
 	std::vector<int> parent_simvtx_ptype;
 	std::vector<int> parent_pdg;
 	std::vector<int> endpoint_vtx_idx;
+	//if this photon converts, what is simtrack idx of tracks
+	std::vector<int> pc_tke_idx;
+	std::vector<int> pc_tkp_idx;
+	//-1 if this photon does not convert
 	
 };
 sim_g GetSimG(recosim& s){
@@ -336,6 +340,9 @@ sim_g GetSimG(recosim& s){
 	std::vector<int> parent_simvtx_ptype;
 	std::vector<int> parent_pdg;
 	std::vector<int> endpoint_vtx_idx;
+
+	std::vector<int> pc_tke_idx;
+	std::vector<int> pc_tkp_idx;
 	
 	int nSimTrk = (s.SimTrk_simvtx_Idx).GetSize();
 	auto& SimTrk_pdg = s.SimTrk_pdgId;
@@ -357,6 +364,9 @@ sim_g GetSimG(recosim& s){
 	int cidx;
 	int cvtxidx;
 	int ppdg;
+
+	int tke_idx;
+	int tkp_idx;
 
 	//loop over sim tracks, is this pdg == 22?
 	for(int i=0; i<nSimTrk; i++){
@@ -383,6 +393,22 @@ sim_g GetSimG(recosim& s){
 				} 
 
 			}//end j simtrk loop	
+			//reloop again over simtrk if ptype==14 and get pc tracks
+			if( SimVtx_processType[cvtxidx] == 14){
+				for(int j=0; j<nSimTrk; j++){
+					//select simtrks with parent vertex of ctvx child vertex of converted photon in this case
+					//check explicitly for electron as tk1 and positron as tk2
+					if( SimTrk_simvtx_Idx[j] == cvtxidx){
+						if(SimTrk_pdgId[j] == 11) tke_idx = j; 
+						if(SimTrk_pdgId[j] == -11) tkp_idx = j;
+					}
+					 
+				}//end j loop
+			}
+			else{//this photon didnt convert set conversion track stuff to -1
+				tke_idx = -1;
+				tkp_idx = -1;
+			}
 					
 			
 
@@ -394,7 +420,8 @@ sim_g GetSimG(recosim& s){
 			parent_simvtx_ptype.push_back( ptype );
 			parent_pdg.push_back( ppdg );
 			endpoint_vtx_idx.push_back( cvtxidx );
-			
+			pc_tke_idx.push_back( tke_idx );
+			pc_tkp_idx.push_back( tkp_idx );
 			
 		}//end 22 check
 	}//end simtrkloop
@@ -405,6 +432,8 @@ sim_g GetSimG(recosim& s){
 	SG.parent_simvtx_ptype = parent_simvtx_ptype;
 	SG.parent_pdg = parent_pdg;
 	SG.endpoint_vtx_idx = endpoint_vtx_idx;
+	SG.pc_tke_idx = pc_tke_idx;
+	SG.pc_tkp_idx = pc_tkp_idx;
 
 	return SG; 
 		

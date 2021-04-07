@@ -132,6 +132,8 @@ void histset::AnalyzeEntry(recosim& s){
 	SG =GetSimG(s);
 	//s_g vars
 	double sg_pt,sg_eta,sg_phi, sg_P, sg_gx, sg_gy, sg_gz, sg_Rxy_origin, sg_ex, sg_ey, sg_ez, sg_Rxy_endpt;
+
+	int pc_eidx, pc_pidx;
 	int exyz_ptype;
 	//min pt acceptance cut
 	double g_minpt = 0.2;//GeV
@@ -234,6 +236,26 @@ void histset::AnalyzeEntry(recosim& s){
 			FillTH1(id_trueConv, sg_Rxy_endpt, w);
 			FillTH1(id_trueConv_Coarse, sg_Rxy_endpt, w);
 		}}
+
+		//check tracks and compare
+		if( sg_Rxy_endpt != -1 ){
+		if( exyz_ptype==14){
+			pc_eidx = SG.pc_tke_idx[i];
+			pc_pidx = SG.pc_tkp_idx[i];
+			std::cout<<"pceidx pcpidx "<<pc_eidx<<" "<<pc_pidx<<std::endl;
+			std::cout<<"pts "<<SimTrk_pt[pc_eidx] <<" "<<SimTrk_pt[pc_pidx]<<std::endl;
+			if(SimTrk_pt[pc_eidx] < 0.2 || SimTrk_pt[pc_pidx] < 0.2){
+				FillTH1(id_trueConv_gPass_trkFail, sg_Rxy_endpt,w);
+				FillTH1(id_trueConv_gPass_trkFail_Coarse, sg_Rxy_endpt,w);
+				if( SimTrk_pt[pc_eidx] < SimTrk_pt[pc_pidx]){
+					FillTH1(id_minpt_gtrkpc, SimTrk_pt[pc_eidx], w);
+				}
+				else{
+					FillTH1(id_minpt_gtrkpc, SimTrk_pt[pc_pidx], w);
+				}
+
+			}	
+		}}
 			
 		}}}//}//end g acceptance
 
@@ -243,6 +265,8 @@ void histset::AnalyzeEntry(recosim& s){
 /////////////////////////////////////////
 
 /////////////////////////////////////////?SIM things
+//new approach to simvtx thing
+
 /*
 
 	//get sim pc mask
