@@ -112,7 +112,11 @@ void histset::AnalyzeEntry(recosim& s){
 //	double npvweight = weight;
 //	w = npvweight * mc2data_w;
 //	w=12.05311;
-	w=1.;
+//	w=1.;
+
+//weighting local test 2 to minbias 2018B
+	w=56.24787;
+
 	FillTH1( id_numpcHist, numberOfPC,w);
 
 	for(int i=0; i<numberOfPC; i++){
@@ -127,11 +131,13 @@ void histset::AnalyzeEntry(recosim& s){
 	}
 
 ///////////////////////////////////////sim photons
-//
-	sim_g SG;
-	SG =GetSimG(s);
-	//s_g vars
-	double sg_pt,sg_eta,sg_phi, sg_P, sg_gx, sg_gy, sg_gz, sg_Rxy_origin, sg_ex, sg_ey, sg_ez, sg_Rxy_endpt;
+//new stuff based on old stuff
+//do SG get truegeom
+
+sim_g SG;
+SG = GetSimG(s);
+
+double sg_pt,sg_eta,sg_phi, sg_P, sg_gx, sg_gy, sg_gz, sg_Rxy_origin, sg_ex, sg_ey, sg_ez, sg_Rxy_endpt;
 
 	int pc_eidx, pc_pidx;
 	int exyz_ptype;
@@ -142,7 +148,7 @@ void histset::AnalyzeEntry(recosim& s){
 	double gBinEnd = 20.;
 	double gBinWidth = gBinEnd/ ((double)nGbins);
 	double gBinStart = 0.;
-	double binLow,bincenter;
+	double binLow,binUp;//bin edges
 	binLow = gBinStart;
 
 	Float_t Rbins[] = { 1,5,9,13,18,20 };
@@ -162,112 +168,79 @@ void histset::AnalyzeEntry(recosim& s){
 		sg_ez = SimVtx_z[ SG.endpoint_vtx_idx[i] ];
 		exyz_ptype = SimVtx_processType[ SG.endpoint_vtx_idx[i] ];
 		sg_Rxy_endpt = sqrt( sg_ex*sg_ex + sg_ey*sg_ey );
+			if( exyz_ptype==14 ){
+			pc_eidx = SG.pc_tke_idx[i];
+			pc_pidx = SG.pc_tkp_idx[i];
+			}
 		}else{
 			sg_ex=0;
 			sg_ey=0;
 			sg_ez=0;
 			sg_Rxy_endpt = -1;
 		}
-		
-		//look at photons with *no* cuts
-		if(sg_Rxy_origin < 0.5){
-		if(abs( sg_gz ) < 1.){
-		//highly transverse
-		if(abs(sg_eta) < 0.5){
-			
-			FillTH1(id_Ng_BP1,0.5,w);
-			FillTH1(id_Ng_BP2,0.5,w);
-			//does this photon convert in bpix 1 or 2??
-			//BPIX1 1,5   BPIX2 5,9	
-			if( sg_Rxy_endpt > 1 && sg_Rxy_endpt < 5 && exyz_ptype == 14){
-				FillTH1(id_Nc_BP1,0.5,w);
-			}
-			if( sg_Rxy_endpt > 5 && sg_Rxy_endpt < 9 && exyz_ptype == 14){
-				FillTH1(id_Nc_BP2,0.5,w);
-			}
-		
-		}}}
-		
-//
-		//does this sim photon satisfy acceptance cuts?
-		//min energy?
-		if(sg_pt > 2*sqrt( g_minpt*g_minpt + GV.MASS_ELECTRON * GV.MASS_ELECTRON ) ){
+		//is the photon greater than 400mev?
+		if(sg_pt > .4 ){
 		//origin less than z<25?
 		if( abs(sg_gz) < 25.){
 		//cos theta< 0.85?
 		if( abs( sg_eta ) < 1.25615 ){
-		//if( sg_Rxy_origin < 0.5 ){
-			//now check if the photon is created before radial point and ends after (if it has an endpoint)
-			//if( sg_Rxy_origin < 1.0 ){
-			//	FillTH1(id_ngPrompt,0.5,w);
-			//}
-		
+		//if the 400mev photon converts do the tracks pass pt req
+		if( (sg_Rxy_endpt == -1) || ( (exyz_ptype==14) && (SimTrk_pt[pc_eidx]>0.2 && SimTrk_pt[pc_pidx]>0.2) ) ){
 			
+			//binning is defined by variables here, NOT AUTOMATIC
 			for(int j=1; j<=nGbins; j++){
-				bincenter = binLow + gBinWidth;
+				binUp = binLow + gBinWidth;
 				//does the ph oton start before and end after this bin center?
 				if(sg_Rxy_origin < binLow ){
-		//		if(sg_Rxy_origin < 1.0){
-				if(sg_Rxy_endpt == -1 || sg_Rxy_endpt > bincenter){
-					FillTH1(id_trueGeom, bincenter, w);	
+				if(sg_Rxy_endpt == -1 || sg_Rxy_endpt > binUp){
+					FillTH1(id_trueGeom, binUp, w);	
 				}}
 				binLow += gBinWidth;
 			}	
 			binLow = gBinStart;
-			bincenter=0;
-// Float_t Rbins[] = { 1,5,9,13,18,20 };
-  //    Int_t  binnum = 5;
+			binUp=0;
 
 			//coarse binning
 			for(int j=0; j<binnum; j++){
 				binLow = Rbins[j];
-				bincenter = Rbins[j+1];
+				binUp = Rbins[j+1];
 				if( sg_Rxy_origin < binLow ){
-				if( sg_Rxy_endpt == -1 || sg_Rxy_endpt > bincenter ){
-					FillTH1(id_trueGeom_Coarse, (binLow+bincenter)/2. , w);
+				if( sg_Rxy_endpt == -1 || sg_Rxy_endpt > binUp ){
+					FillTH1(id_trueGeom_Coarse, (binLow+binUp)/2. , w);
 				}}
 			}
 			binLow = gBinStart;
-			bincenter=0;
-			
+			binUp=0;
 
+
+			//if passes all cuts and converts + is reconstructable, store endpoint as trueconv
+			if( sg_Rxy_endpt != -1 && exyz_ptype==14 && SimTrk_pt[pc_eidx] > 0.2 && SimTrk_pt[pc_pidx] > 0.2 ){
+				FillTH1(id_trueConv, sg_Rxy_endpt, w);
+				FillTH1(id_trueConv_Coarse, sg_Rxy_endpt, w);
+			}
+			
+			
+		}}}}
+/*
+		//store true conversions
 		if( sg_Rxy_endpt != -1 ){
 		if( exyz_ptype==14 ){
+			//pc_eidx = SG.pc_tke_idx[i];
+			//pc_pidx = SG.pc_tkp_idx[i];
+		if(SimTrk_pt[pc_eidx] > 0.2 && SimTrk_pt[pc_pidx] > 0.2){
 			FillTH1(id_trueConv, sg_Rxy_endpt, w);
 			FillTH1(id_trueConv_Coarse, sg_Rxy_endpt, w);
-		}}
+		}}}
+*/
 
-		//check tracks and compare
-		if( sg_Rxy_endpt != -1 ){
-		if( exyz_ptype==14){
-			pc_eidx = SG.pc_tke_idx[i];
-			pc_pidx = SG.pc_tkp_idx[i];
-			std::cout<<"pceidx pcpidx "<<pc_eidx<<" "<<pc_pidx<<std::endl;
-			std::cout<<"pts "<<SimTrk_pt[pc_eidx] <<" "<<SimTrk_pt[pc_pidx]<<std::endl;
-			if(SimTrk_pt[pc_eidx] < 0.2 || SimTrk_pt[pc_pidx] < 0.2){
-				FillTH1(id_trueConv_gPass_trkFail, sg_Rxy_endpt,w);
-				FillTH1(id_trueConv_gPass_trkFail_Coarse, sg_Rxy_endpt,w);
-				if( SimTrk_pt[pc_eidx] < SimTrk_pt[pc_pidx]){
-					FillTH1(id_minpt_gtrkpc, SimTrk_pt[pc_eidx], w);
-				}
-				else{
-					FillTH1(id_minpt_gtrkpc, SimTrk_pt[pc_pidx], w);
-				}
+	}//end photon loop
+/////////////////////////////////////////////////// end new stuff
 
-			}	
-		}}
-			
-		}}}//}//end g acceptance
-
-	}
-
-//
-/////////////////////////////////////////
 
 /////////////////////////////////////////?SIM things
 //new approach to simvtx thing
 
-/*
+
 
 	//get sim pc mask
 	sim_pc SPC;
@@ -308,13 +281,13 @@ void histset::AnalyzeEntry(recosim& s){
 				//this sim conv has passed acceptance
 				FillTH1(id_effPtD, SimTrk_pt[gidx], w);
 				FillTH1(id_effRD, sqrt(sx*sx + sy*sy ) , w);
-				FillTH1(id_trueConv, sqrt(sx*sx + sy*sy), w);		
+//				FillTH1(id_trueConv, sqrt(sx*sx + sy*sy), w);		
 			
 				if(SimTrk_pdgId[t1idx] > 0){
 					ptm = SimTrk_pt[t1idx];
 					ptp = SimTrk_pt[t2idx];
 				}
-				else{	ptm
+				else{
 					ptm = SimTrk_pt[t2idx];
 					ptp = SimTrk_pt[t1idx];
 				}
@@ -323,7 +296,7 @@ void histset::AnalyzeEntry(recosim& s){
 			}}}}
 		}
 	}
-*/
+
 //////////////////////////////////////////end SIM THINGS
 	//calculate common variables
 
@@ -359,19 +332,14 @@ void histset::AnalyzeEntry(recosim& s){
 			FillTH1(id_purityRN, CVs[pcidx].radius, w);
 			FillTH1(id_purityXPN, CVs[pcidx].xplus, w);
 			FillTH1(id_nconvR_match, CVs[pcidx].radius, w);
-			FillTH1(id_nconvR_match_Coarse, CVs[pcidx].radius, w);
-		//	FillTH1(id_nconvPt, CVs[pcidx].pt, w);
-		//	FillTH1(id_nconvR, CVs[pcidx].radius, w);
-		//	FillTH1(id_nconvXP, CVs[pcidx].xplus, w);
+
 		}}
 		FillTH1(id_purityPtD, CVs[pcidx].pt, w);
 		FillTH1(id_purityRD, CVs[pcidx].radius, w);
 		FillTH1(id_purityXPD, CVs[pcidx].xplus, w);
-		FillTH1(id_nconvPt, CVs[pcidx].pt, w);
-                FillTH1(id_nconvR, CVs[pcidx].radius, w);
-                FillTH1(id_nconvXP, CVs[pcidx].xplus, w);
-		FillTH1(id_nconvR_all, CVs[pcidx].radius, w);
-		FillTH1(id_nconvR_all_Coarse, CVs[pcidx].radius, w);
+		FillTH1(id_nconvPt_all, CVs[pcidx].pt, w);
+                FillTH1(id_nconvR_all, CVs[pcidx].radius, w);
+                FillTH1(id_nconvXP_all, CVs[pcidx].xplus, w);
 
 		if(Conv_vtxdl[pcidx] > matchcut){
 			FillTH1(id_nconvPt_fake, CVs[pcidx].pt, w);

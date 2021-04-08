@@ -33,42 +33,22 @@ void histset::init(){
 
     //true geom counts
     TH1Manager.at(id_trueGeom) = new MyTH1D("trueGeom","N true photons",20,0.0,20.0);
-    TH1Manager.at(id_ngPrompt) = new MyTH1D("ngPrompt","N true prompt",1,0.0,1.0);
     TH1Manager.at(id_trueConv) = new MyTH1D("trueConv","N true convs", 20,0.0,20.0);
-    
     TH1Manager.at(id_trueGeom_Coarse) = new MyTH1D("trueGeom_Coarse","N true photons",binnum, Rbins);
     TH1Manager.at(id_trueConv_Coarse) = new MyTH1D("trueConv_Coarse","N true convs",binnum,Rbins);
-    TH1Manager.at(id_nconvR_match) = new MyTH1D("nconvR_match","N matched reco conv",20,0.0,20.0);
-    TH1Manager.at(id_nconvR_all) = new MyTH1D("nconvR_all","N incl reco conv",20,0.0,20.0);
-    TH1Manager.at(id_nconvR_match_Coarse) = new MyTH1D("nconvR_match_Coarse","",binnum, Rbins);
-    TH1Manager.at(id_nconvR_all_Coarse) = new MyTH1D("nconvR_all_Coarse","",binnum,Rbins);
 
-    //testing photon versus simvtx loop
-    TH1Manager.at(id_trueConv_simvtx) = new MyTH1D("trueConv_simvtx","N true convs", 20,0.0,20.0);
-    TH1Manager.at(id_trueConv_simvtx_Coarse) = new MyTH1D("trueConv_simvtx_Coarse","N true convs",binnum,Rbins);
-    //photon checks
-    //if a photon passes min energy and converts, what is min pt distribution?	  
-    TH1Manager.at(id_minpt_gtrkpc) = new MyTH1D("minpt_gtrkpc","min pt of converted sim photon that passes cuts;p_{T} GeV",30,0,3.0);
-    //count the number of photons that convert, pass g pt req, and have tracks that do not pass the pt cut
-    TH1Manager.at(id_trueConv_gPass_trkFail) = new MyTH1D("trueConv_gPass_trkFail","n Convs that pass gpt but fail min trk pt;R [GeV]",20,0.0,20.0);
-    TH1Manager.at(id_trueConv_gPass_trkFail_Coarse) = new MyTH1D("trueConv_gPass_trkFail_Coarse","n Convs that pass gpt but fail min trk pt;R [GeV]",binnum,Rbins);
-
-    //study of BPIX1
-    TH1Manager.at(id_Ng_BP1 ) = new MyTH1D("Ng_BP1", "N prompt photons",1,0.0,1.0);
-    TH1Manager.at(id_Nc_BP1 ) = new MyTH1D("Nc_BP1", "N conv. BPIX1",1,0.0,1.0);
-    //study of BPIX2
-    TH1Manager.at(id_Ng_BP2 ) = new MyTH1D("Ng_BP2", "N prompt photons",1,0.0,1.0);
-    TH1Manager.at(id_Nc_BP2 ) = new MyTH1D("Nc_BP2", "N conv. BPIX2",1,0.0,1.0);
-
-    TH1Manager.at(id_nconvPt ) = new MyTH1D("nconvPt","N Conversions; p_{T} (GeV); N_{conv}",6,0.0,6.0);
-    TH1Manager.at(id_nconvR ) = new MyTH1D("nconvR","N Conversions; R (cm); N_{conv}",20,0.0,20.0);
-    TH1Manager.at(id_nconvXP ) = new MyTH1D("nconvXP","N Conversion; Positron p_{T} fraction X_{+}; N_{conv}",10,0.,1.);
+    TH1Manager.at(id_nconvPt_match ) = new MyTH1D("nconvPt_match","N Matched Conversions; p_{T} (GeV); N_{conv}",6,0.0,6.0);
+    TH1Manager.at(id_nconvR_match ) = new MyTH1D("nconvR_match","N Matched Conversions; R (cm); N_{conv}",20,0.0,20.0);
+    TH1Manager.at(id_nconvXP_match ) = new MyTH1D("nconvXP_match","N Matched Conversion; Positron p_{T} fraction X_{+}; N_{conv}",10,0.,1.);
 
     TH1Manager.at(id_nconvPt_fake) = new MyTH1D("nconvPt_fake", "N Fake Conversions;p_{T} (GeV); N_{conv}",6,0.0,6.0);
     TH1Manager.at(id_nconvR_fake) = new MyTH1D("nconvR_fake","N Fake Conversions;R (cm);N_{conv}",20,0.0,20.0);
     TH1Manager.at(id_nconvXP_fake) = new MyTH1D("nconvXP_fake","N Fake Conversions;Positron p_{T} fraction X_{+}",10,0.,1.);
 
-	
+    TH1Manager.at(id_nconvPt_all) = new MyTH1D("nconvPt_all", "N Incl. Conversions;p_{T} (GeV); N_{conv}",6,0.0,6.0);
+    TH1Manager.at(id_nconvR_all) = new MyTH1D("nconvR_all","N Incl. Conversions;R (cm);N_{conv}",20,0.0,20.0);
+    TH1Manager.at(id_nconvXP_all) = new MyTH1D("nconvXP_all","N Incl. Conversions;Positron p_{T} fraction X_{+}",10,0.,1.);
+
 	
 // init TH2D
     TH2Manager.at(id_xyHist) = new MyTH2D("xyHist", "Conversion Vertices per mm^{2} bin; x (cm); y (cm)",200,-10.,10.,200,-10.,10.);
