@@ -457,6 +457,7 @@ struct GlobalValues{
     const double ZCUT = 25.0;
     const double FITPROBCUT = 0.010;
     const double MASSCUT = 0.15;
+    const double MINPT = 0.2;
 
     const double MASS_ELECTRON = 0.5109989461e-3;
     const double MASS_PION = 139.57061e-3;
@@ -545,6 +546,7 @@ std::vector<CommonVars> GetCommonVars(recosim& s, bool isRealData){//pass in boo
         vzz = PC_vtx_sigmazz[i];	
    
 	phi = atan2(y-y0, x-x0);
+        if (phi < 0) { phi += 2 * M_PI; }
         theta = atan2(pt,pz);
         eta = -log(tan(theta/2.0));
         rho  =  sqrt( (x-x0bp)*(x-x0bp) + (y-y0bp)*(y-y0bp)) ;
@@ -665,7 +667,269 @@ std::vector<CommonVars> GetCommonVars(recosim& s, bool isRealData){//pass in boo
 
 return pc_comm;
 }
+std::pair<std::vector<double>, std::vector<double> > getGEndpoints(recosim& s, int gidx){
+	//for simtrack photon at gidx origin and endpoints first=(sx,sy,sz) second=(ex,ey,ez)
+	std::vector<double> spoints(3);
+	std::vector<double> epoints(3);
+	//get start point
+	auto nSimVtx = *(s.nSimVtx);
 
+	auto& SimTrk_simvtx_Idx	 = s.SimTrk_simvtx_Idx;
+	double sx,sy,sz;
+	int svidx = SimTrk_simvtx_Idx[gidx];
+	
+	auto& SimVtx_x = s.SimVtx_x;
+	auto& SimVtx_y = s.SimVtx_y;
+	auto& SimVtx_z = s.SimVtx_z;
+	sx = SimVtx_x[svidx];
+	sy = SimVtx_y[svidx];
+	sz = SimVtx_z[svidx];
+
+	auto& SimTrk_trackId = s.SimTrk_trackId;
+	int gtid = SimTrk_trackId[gidx];
+	double ex,ey,ez;
+	//have to loop simvtx and find simvtx that has this photon as parent
+	ex=-9999;
+	ey=-9999;
+	ez=-9999;
+	auto& SimVtx_simtrk_parent_tid = s.SimVtx_simtrk_parent_tid;
+	for(int i=0; i<nSimVtx; i++){
+		if( SimVtx_simtrk_parent_tid[i] == gtid ){
+			ex = SimVtx_x[i]; 
+			ey = SimVtx_y[i];
+			ez = SimVtx_z[i];
+		}		
+	}
+	spoints[0]=sx;
+	spoints[1]=sy;
+	spoints[2]=sz;
+	epoints[0]=ex;
+	epoints[1]=ey;
+	epoints[2]=ez;
+	std::pair<std::vector<double>, std::vector<double> > points{};
+	points.first = spoints;
+	points.second= epoints;
+	return points;
+	
+}
+
+std::vector<std::pair<int,int> > getGParentColl(recosim& s){
+//first photon sim track idx
+//second:
+//0=prompt pi0 
+//1=non prompt pi0
+//2=electron/brem
+//3=prompt other
+//4=non prompt other
+//5=non prompt no parent found
+	std::vector< std::pair<int,int> > Gcoll{};
+	
+	int nSimVtx = (s.SimVtx_processType).GetSize();
+        int nSimTrk = (s.SimTrk_simvtx_Idx).GetSize();
+
+        auto& SimVtx_processType = s.SimVtx_processType;
+        auto& SimTrk_simvtx_Idx = s.SimTrk_simvtx_Idx;
+        auto& SimVtx_simtrk_parent_tid = s.SimVtx_simtrk_parent_tid;
+        auto& SimTrk_trackId = s.SimTrk_trackId;
+	auto& SimTrk_pdgId = s.SimTrk_pdgId;
+	auto& SimTrk_eta = s.SimTrk_eta;
+	auto& SimTrk_phi = s.SimTrk_phi;
+        auto& SimTrk_pt = s.SimTrk_pt;
+	
+
+	int sidx;
+	int gidx;
+	int gtype;
+	double px1,py1,pz1,P1;
+	double px2,py2,pz2,P2;
+	double mggpi0;
+	int ptid;
+	for(int i=0; i<nSimTrk; i++){
+		
+		//is this sim trk 22?
+		if(SimTrk_pdgId[i] != 22) continue;
+		gtype=-1;
+		//at this point we have a photon
+		//if it isnt the last sim trk:
+		sidx = SimTrk_simvtx_Idx[i];
+		if( SimVtx_processType[ sidx ] == 0){ // this photon is prompt
+			//check around the photon neighbors to see if we have a pi0
+			px1=SimTrk_pt[i]*cos(SimTrk_phi[i]);
+			py1=SimTrk_pt[i]*sin(SimTrk_phi[i]);
+			pz1=SimTrk_pt[i]*sinh(SimTrk_eta[i]);
+			P1=SimTrk_pt[i]*cosh(SimTrk_eta[i]);
+			//extra cases, if first or last simtrk
+			if(i==0){
+				//check pi0 mass with next photon
+				if( SimTrk_pdgId[i+1] == 22){
+					px2=SimTrk_pt[i+1]*cos(SimTrk_phi[i+1]);
+                                        py2=SimTrk_pt[i+1]*sin(SimTrk_phi[i+1]);
+                                        pz2=SimTrk_pt[i+1]*sinh(SimTrk_eta[i+1]);
+                                        P2=SimTrk_pt[i+1]*cosh(SimTrk_eta[i+1]);
+					mggpi0 = 2*(P1*P2 - (px1*px2+py1*py2+pz1*pz2) );
+                                        mggpi0 = sqrt(mggpi0);
+					//if neighbor makes pi0 type 0 else type3
+					if(mggpi0 > 0.130 && mggpi0 < 0.140){
+						gtype = 0;
+					}
+					else{
+						gtype = 3;
+					}
+				}
+				else{ //no neighbor photon so type 3
+					gtype = 3;
+				}	
+			}else if(i == (nSimTrk-1) ){//end edgecase start edgecase
+				//check pi0 mass with previous photon
+				if( SimTrk_pdgId[i-1] == 22){
+                                        px2=SimTrk_pt[i-1]*cos(SimTrk_phi[i-1]);
+                                        py2=SimTrk_pt[i-1]*sin(SimTrk_phi[i-1]);
+                                        pz2=SimTrk_pt[i-1]*sinh(SimTrk_eta[i-1]);
+                                        P2=SimTrk_pt[i-1]*cosh(SimTrk_eta[i-1]);
+                                        mggpi0 = 2*(P1*P2 - (px1*px2+py1*py2+pz1*pz2) );
+                                        mggpi0 = sqrt(mggpi0);
+                                        //if neighbor makes pi0 type 0 else type3
+                                        if(mggpi0 > 0.130 && mggpi0 < 0.140){
+                                                gtype = 0;
+                                        }
+                                        else{
+                                                gtype = 3;
+                                        }
+                                }
+                                else{ //no neighbor photon so type 3
+                                        gtype = 3;
+                                }
+				
+
+			}else{//end edgecase start standard case
+				//check pi0 mass with neighbor photon
+				if( SimTrk_pdgId[i-1] == 22){
+                                        px2=SimTrk_pt[i-1]*cos(SimTrk_phi[i-1]);
+                                        py2=SimTrk_pt[i-1]*sin(SimTrk_phi[i-1]);
+                                        pz2=SimTrk_pt[i-1]*sinh(SimTrk_eta[i-1]);
+                                        P2=SimTrk_pt[i-1]*cosh(SimTrk_eta[i-1]);
+                                        mggpi0 = 2*(P1*P2 - (px1*px2+py1*py2+pz1*pz2) );
+                                        mggpi0 = sqrt(mggpi0);
+                                        //if neighbor makes pi0 type 0 else type3
+                                        if(mggpi0 > 0.130 && mggpi0 < 0.140){
+                                                gtype = 0; 
+					//	continue;
+                                        }
+                                       // else{
+                                       //         gtype = 3;
+                                       // }
+                                }//end left neighbor check
+				if( SimTrk_pdgId[i+1] == 22){
+                                        px2=SimTrk_pt[i+1]*cos(SimTrk_phi[i+1]);
+                                        py2=SimTrk_pt[i+1]*sin(SimTrk_phi[i+1]);
+                                        pz2=SimTrk_pt[i+1]*sinh(SimTrk_eta[i+1]);
+                                        P2=SimTrk_pt[i+1]*cosh(SimTrk_eta[i+1]);
+                                        mggpi0 = 2*(P1*P2 - (px1*px2+py1*py2+pz1*pz2) );
+                                        mggpi0 = sqrt(mggpi0);
+                                        //if neighbor makes pi0 type 0 else type3
+                                        if(mggpi0 > 0.130 && mggpi0 < 0.140){
+                                                gtype = 0;
+                                        }
+                                       // else{
+                                       //         gtype = 3;
+                                       // }
+                                }//end right neighbor check
+				if(  gtype == -1) gtype = 3; //if no neigbors or no pi0 gtype = -1
+
+			}//end normal case
+
+		}//end ptype 0 check
+		else{//if its not prompt then it has a parent, is it a pi0, electron or something else?
+			//loop over simtrk again
+			ptid = SimVtx_simtrk_parent_tid[sidx];
+			bool found=false;
+			for(int j=0; j<nSimTrk; j++){
+				if(SimTrk_trackId[j] == ptid){
+					if(abs(SimTrk_pdgId[j]) == 111){//pi0?
+						gtype = 1;
+					}
+					else if(abs(SimTrk_pdgId[j]) == 11){//electron?	
+						gtype = 2;
+					}else{
+						gtype = 4;
+					}
+					found=true;
+					break;
+				}//end ptid match found
+				if(!found) gtype=5;
+			}//end simtrk ptid matching loop
+		}//end non prompt parent checking			
+		
+		//create a pair, push the idx and type
+		std::pair<int, int> photon;
+		photon.first =i;
+		photon.second = gtype;
+		Gcoll.push_back(photon);		
+		
+		
+	}//end sim trk loop	
+	
+	return Gcoll;
+
+}
+//std::vector<std::pair<int,double> > getPCMatchingColl(recosim& s, double cutdL){ //try to match all reco pc
+std::map<int, std::pair<int,double> > getPCMatchingColl(recosim& s, double cutdL){
+//mindL is the minimum to be matched
+//loop svtx , label all reco convs
+//0= matched , nearest dR
+//1= NI , nearest dR
+//2= unmatched, nearest dR
+//
+	std::map< int, std::pair<int,double> > pcmap{};
+	auto& SimVtx_processType = s.SimVtx_processType;
+	int nSimVtx = (s.SimVtx_processType).GetSize();
+	auto& PC_x = s.Conv_vtx_X;
+	auto& PC_y = s.Conv_vtx_Y;
+	auto& PC_z = s.Conv_vtx_Z;
+	int npc = PC_x.GetSize();
+	auto& SimVtx_x = s.SimVtx_x;
+    	auto& SimVtx_y = s.SimVtx_y;
+    	auto& SimVtx_z = s.SimVtx_z;		
+		
+		double mindL,dL;
+		double matchType;
+		double sx,sy,sz;
+		double cx,cy,cz;
+	for(int i=0; i<npc; i++){
+		mindL = 999999;
+		matchType= -1;
+		
+		cx = PC_x[i];
+                cy = PC_y[i];
+                cz = PC_z[i];
+		for(int j=0; j<nSimVtx; j++){
+			sx = SimVtx_x[j];
+                        sy = SimVtx_y[j];
+                        sz = SimVtx_z[j];
+						
+			dL = sqrt( (sx-cx)*(sx-cx) + (sy-cy)*(sy-cy) + (sz-cz)*(sz-cz) );
+			if( dL < mindL ){
+				mindL = dL;
+				if(SimVtx_processType[j] == 14 && mindL < cutdL){
+					 matchType=0;
+				}
+				else if(SimVtx_processType[j] != 14 && mindL < cutdL){
+					 matchType=1;
+				}else{
+					matchType =2;
+				}
+				
+			}// end dL check
+		}//end simvtx loop
+		std::pair<int,double> pcmatch{};
+		pcmatch.first = matchType;
+		pcmatch.second = mindL;
+		pcmap[i]=pcmatch;
+	}//end npc loop
+
+	return pcmap;
+
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //(0) create cutmask
@@ -678,6 +942,7 @@ std::vector<bool> GetCutMask(recosim& s, std::vector<CommonVars> cv ){
 
   std::vector<bool> cutmask(PC_x.GetSize());
   double rerr,z,theta,fitprob,nBefore0,nBefore1;
+  double PT1,PT2;
   for(int i=0; i<cutmask.size(); i++){
         rerr = cv[i].rerr;
         z = cv[i].z;
@@ -685,8 +950,10 @@ std::vector<bool> GetCutMask(recosim& s, std::vector<CommonVars> cv ){
         fitprob = cv[i].pfit;
         nBefore0 = PC_vTrack0_nBefore[i];
         nBefore1 = PC_vTrack1_nBefore[i];
+	PT1 = std::sqrt(cv[i].px0p*cv[i].px0p + cv[i].py0p*cv[i].py0p);
+        PT2 = std::sqrt(cv[i].px1p*cv[i].px1p + cv[i].py1p*cv[i].py1p);
 //	std::cout<< rerr <<" "<< abs(z)<<" "<<abs(cos(theta))<<" "<<fitprob<<" "<<std::max(nBefore0,nBefore1)<<std::endl;
-        if( rerr < GV.RERRCUT && abs(z) < GV.ZCUT && abs(cos(theta)) < GV.COSTCUT && fitprob > GV.FITPROBCUT && std::max(nBefore0,nBefore1)==0){
+        if( rerr < GV.RERRCUT && abs(z) < GV.ZCUT && abs(cos(theta)) < GV.COSTCUT && fitprob > GV.FITPROBCUT && std::max(nBefore0,nBefore1)==0 && PT1 > GV.MINPT && PT2 > GV.MINPT){
                 cutmask[i] = true;
         }
         else{

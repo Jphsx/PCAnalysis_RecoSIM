@@ -12,7 +12,7 @@
 #VERSION=$1
 #echo 'Version '$VERSION
 
-LIST="batch"
+LIST="batchUNL"
 
 #MACRO=runmacro2.py
 #echo 'Macro '$MACRO

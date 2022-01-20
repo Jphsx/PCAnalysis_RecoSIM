@@ -160,7 +160,10 @@ public :
    TTreeReaderArray<Float_t> SimVtx_z = {fReader, "SimVtx_z"};
    TTreeReaderArray<Int_t> SimVtx_processType = {fReader, "SimVtx_processType"};
    TTreeReaderArray<Int_t> SimVtx_simtrk_parent_tid = {fReader, "SimVtx_simtrk_parent_tid"};
-
+   
+   //TTreeReaderValue<double> w_pvndof0_BC = {fReader, "w_pvndof0_BC"};
+   TTreeReaderValue<double> w_pvtk_BC = {fReader, "w_pvtk_BC"};  
+ 
    recosim(TTree * /*tree*/ =0) { }
    virtual ~recosim() { }
    virtual Int_t   Version() const { return 2; }

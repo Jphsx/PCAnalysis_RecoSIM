@@ -45,7 +45,7 @@ pwd
 echo "Start execution"
 
 #./runmyanalysis.sh ${VERSION} ${MACRO}
-./runmyanalysis.sh
+./runmyanalysis.sh ${1} runmacro.py ${2} 
 
 date
 
