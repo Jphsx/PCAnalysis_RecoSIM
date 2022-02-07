@@ -402,7 +402,9 @@ std::vector<CommonVars> CVs = GetCommonVars(s,false);
 //		}
 		}//end mask4 check	
 	}
-
+///fresh flux plot stuff
+//
+	
 /*	
 	//do flux plots
 	std::vector< std::pair<int, int> > GColl = getGParentColl(s);

@@ -667,6 +667,7 @@ std::vector<CommonVars> GetCommonVars(recosim& s, bool isRealData){//pass in boo
 
 return pc_comm;
 }
+
 std::pair<std::vector<double>, std::vector<double> > getGEndpoints(recosim& s, int gidx){
 	//for simtrack photon at gidx origin and endpoints first=(sx,sy,sz) second=(ex,ey,ez)
 	std::vector<double> spoints(3);
@@ -711,6 +712,60 @@ std::pair<std::vector<double>, std::vector<double> > getGEndpoints(recosim& s, i
 	points.second= epoints;
 	return points;
 	
+}
+///////////////////////////////////new photon function
+/*double getPhotonRend(recosim&s, int gidx){
+ 
+	auto& SimTrk_simvtx_Idx  = s.SimTrk_simvtx_Idx;
+        double sx,sy,sz,ex,ey,ez;
+        int svidx = SimTrk_simvtx_Idx[gidx];//use track id to get origin
+
+        auto& SimVtx_x = s.SimVtx_x;
+        auto& SimVtx_y = s.SimVtx_y;
+        auto& SimVtx_z = s.SimVtx_z;
+        sx = SimVtx_x[svidx];
+        sy = SimVtx_y[svidx];
+        sz = SimVtx_z[svidx];
+	auto& SimTrk_trackId = s.SimTrk_trackId;
+        int gtid = SimTrk_trackId[gidx];
+	
+
+
+}*/
+std::vector<int> getSimpleGidxList( recosim& s){
+//find all sim photons 
+
+//each element is the idx of the SimTrk that has a pdg of 22 (that passes sim acceptance cuts)
+std::vector<int> gidxlist{};
+
+	auto& SimTrk_pdgId = s.SimTrk_pdgId;
+	int nSimTrk = (s.SimTrk_pdgId).GetSize();
+	
+	auto& SimTrk_pt = s.SimTrk_pt;
+	auto& SimTrk_eta = s.SimTrk_eta;
+	double gpt,geta,gpz;
+
+	auto& SimTrk_simvtx_Idx = s.SimTrk_simvtx_Idx;	
+
+	for(int i=0; i<nSimTrk; i++){
+		if(SimTrk_pdg[i] == 22){
+
+			gpt = SimTrk_pt[i];
+                        geta = SimTrk_eta[i];
+                        gpz = gpt*sinh(geta);
+                        costg = cos( atan2(gpt,gpz) );
+			//its a photon but does it pass cuts (check kinematics, if it passes check origin)
+			if(abs(costg) < GV.COSTCUT && gpt > GV.MINPT*2.){
+				//we passed some cuts now check origin
+						
+				if(abs(Sz) < GV.ZCUT){
+
+				}
+			} 
+		}
+	}
+
+
 }
 
 std::vector<std::pair<int,int> > getGParentColl(recosim& s){
