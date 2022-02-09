@@ -45,6 +45,7 @@
 		id_radfluxcoarse,
 		id_fluxcomp,
 		id_matchdR,
+		id_gflux,
  	    numTH1Hist};
        
 	enum th2d_ids{

@@ -667,7 +667,40 @@ std::vector<CommonVars> GetCommonVars(recosim& s, bool isRealData){//pass in boo
 
 return pc_comm;
 }
+double getDriftFromPxPyPz( recosim& s, int gidx){
 
+	auto& SimTrk_simvtx_Idx = s.SimTrk_simvtx_Idx;
+	int svidx = SimTrk_simvtx_Idx[gidx];
+
+        auto& SimVtx_x = s.SimVtx_x;
+        auto& SimVtx_y = s.SimVtx_y;
+        auto& SimVtx_z = s.SimVtx_z;
+	double sx,sy,sz;
+        sx = SimVtx_x[svidx];
+        sy = SimVtx_y[svidx];
+        sz = SimVtx_z[svidx];
+
+        auto& SimTrk_pt = s.SimTrk_pt;
+        auto& SimTrk_eta = s.SimTrk_eta;
+	auto& SimTrk_phi = s.SimTrk_phi;
+        double gpt,geta,gphi,gpz,gpx,gpy;
+
+
+	gpt = SimTrk_pt[gidx];
+        geta = SimTrk_eta[gidx];
+        gpz = gpt*sinh(geta);
+	gpx = gpt*cos(gphi);
+	gpy = gpt*sin(gphi);
+
+	double tdrift, xdrift, ydrift, Rdrift;
+	tdrift = (GV.ZCUT - sz)/(gpz - sz);
+        xdrift = sx + tdrift*(gpx - sx);
+        ydrift = sy + tdrift*(gpy - sy);
+        Rdrift = sqrt( xdrift*xdrift + ydrift*ydrift );
+	
+	return Rdrift;
+
+}
 std::pair<std::vector<double>, std::vector<double> > getGEndpoints(recosim& s, int gidx){
 	//for simtrack photon at gidx origin and endpoints first=(sx,sy,sz) second=(ex,ey,ez)
 	std::vector<double> spoints(3);
@@ -736,19 +769,24 @@ std::vector<int> getSimpleGidxList( recosim& s){
 //find all sim photons 
 
 //each element is the idx of the SimTrk that has a pdg of 22 (that passes sim acceptance cuts)
-std::vector<int> gidxlist{};
+    std::vector<int> gidxlist{};
 
 	auto& SimTrk_pdgId = s.SimTrk_pdgId;
 	int nSimTrk = (s.SimTrk_pdgId).GetSize();
 	
 	auto& SimTrk_pt = s.SimTrk_pt;
 	auto& SimTrk_eta = s.SimTrk_eta;
-	double gpt,geta,gpz;
+	double gpt,geta,gpz,costg;
 
-	auto& SimTrk_simvtx_Idx = s.SimTrk_simvtx_Idx;	
+	auto& SimTrk_simvtx_Idx = s.SimTrk_simvtx_Idx;
+	auto& SimVtx_z = s.SimVtx_z;
+	int svidx;
+	int nSimVtx = (SimVtx_z).GetSize();
+	double Sz;
+	
 
 	for(int i=0; i<nSimTrk; i++){
-		if(SimTrk_pdg[i] == 22){
+		if(SimTrk_pdgId[i] == 22){
 
 			gpt = SimTrk_pt[i];
                         geta = SimTrk_eta[i];
@@ -757,14 +795,18 @@ std::vector<int> gidxlist{};
 			//its a photon but does it pass cuts (check kinematics, if it passes check origin)
 			if(abs(costg) < GV.COSTCUT && gpt > GV.MINPT*2.){
 				//we passed some cuts now check origin
-						
+				svidx = SimTrk_simvtx_Idx[i];
+                                Sz = SimVtx_z[svidx]; 
+								
 				if(abs(Sz) < GV.ZCUT){
+					//this photon is good, save it
+					gidxlist.push_back(i);													
 
 				}
 			} 
 		}
-	}
-
+	}	
+    return gidxlist;
 
 }
 

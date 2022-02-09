@@ -404,6 +404,83 @@ std::vector<CommonVars> CVs = GetCommonVars(s,false);
 	}
 ///fresh flux plot stuff
 //
+	std::vector<int> gidxlist =  getSimpleGidxList(s);
+	std::pair<std::vector<double>, std::vector<double> > g_endpoints{};
+	double Sx,Sy,Sz,Ex,Ey,Ez;
+	double Rorigin,Rfinal,Rdrift, xdrift, ydrift, tdrift;
+
+	//create upper bin edge vector
+	std::vector<double> rbinedge{};
+	std::vector<double> rbincenter{};
+	int nbinsx;
+	auto gfluxhist = TH1Manager.at(id_gflux)->Get();
+        
+
+	nbinsx = gfluxhist->GetNbinsX();
+	for(int i=1; i<nbinsx; i++){
+		rbinedge.push_back( gfluxhist->GetBinCenter(i) + (gfluxhist->GetBinWidth(i)/2.) );
+		rbincenter.push_back(gfluxhist->GetBinCenter(i));
+	}
+
+	//debug what are bin edges?
+	//std::cout<<"edge\n";
+	//for(int i=0; i<rbinedge.size(); i++){
+	//	std::cout<<rbinedge.at(i)<<" ";
+	//}
+	//std::cout<<std::endl;
+	
+	//loop over valid photons
+	for(int i=0; i< gidxlist.size(); i++){
+		//collect the endpoints for every valid photon
+		g_endpoints = getGEndpoints(s, gidxlist[i]);
+
+
+		//if photon origin is outside of viewing range dont bother with it
+		Sx = g_endpoints.first[0];
+                Sy = g_endpoints.first[1];
+                Sz = g_endpoints.first[2];
+
+ 		Rorigin = sqrt(Sx*Sx + Sy*Sy);
+                if(Rorigin > 25.) continue;
+
+		//coordinate geometry time
+		//first address only candidates that have valid endpoints
+		if( g_endpoints.second[0] != -9999 && g_endpoints.second[1] != -9999 && g_endpoints.second[2] != -9999 ){
+		
+			Ex = g_endpoints.second[0];
+			Ey = g_endpoints.second[1];
+			Ez = g_endpoints.second[2];
+
+			Rfinal = sqrt(Ex*Ex + Ey*Ey);
+	                tdrift = (GV.ZCUT - Sz)/(Ez - Sz);
+        	        xdrift = Sx + tdrift*(Ex - Sx);
+               		ydrift = Sy + tdrift*(Ey - Sy);
+                	Rdrift = sqrt( xdrift*xdrift + ydrift*ydrift );
+
+		    }//end valid endpoint check
+		   else{
+			//std::cout<<"No valid endpoint!! -- projecting arbitrary endpoint from origin and momentum vector\n"; 
+			//calculate Ex,Ex,Ez through scaling momentum
+			Rdrift = getDriftFromPxPyPz(s, gidxlist[i] );
+			Rfinal = 25.1; //set rfinal just outside of R "viewing range" because it'll pass through everything if it doesnt drift out in z
+			}
+
+		//std::cout<<"photon Rfinal="<<Rfinal<<" Rdrift="<<Rdrift<<std::endl;
+		//if Rdrift is less than conversion point, then we drifted out of z .. so set rfinal=rdrift
+		if( Rdrift < Rfinal ) Rfinal = Rdrift;
+
+		//fill every bin up to the point of conversion or drift	
+		for(int j=0; j<rbinedge.size(); j++){
+			if( Rfinal >= rbinedge.at(j) ){
+				FillTH1(id_gflux, rbincenter.at(j) , w);		
+			}	
+			else{
+				break;
+			}
+		}//end bin edge loop					
+
+
+	}//end gidxlist loop
 	
 /*	
 	//do flux plots
