@@ -46,7 +46,7 @@
 		id_fluxcomp,
 		id_matchdR,
 		id_gflux,
- 	    numTH1Hist};
+    	    numTH1Hist};
        
 	enum th2d_ids{
 		id_xyHist,
@@ -67,5 +67,10 @@
 		id_pt_shared,
 		id_pt_rerr,
 		id_r_rerr,
+                id_reta_pc,
+                id_reta_effN,
+		id_reta_effD,
+		id_reta_ng,
+
 	
 	    numTH2Hist};

@@ -172,6 +172,7 @@ std::vector<CommonVars> CVs = GetCommonVars(s,false);
                 FillTH2(id_ndof_pcReta, PV_ndof[0] ,CVs[i].etaphys,w);
                 FillTH2(id_ndof_pcRpt, PV_ndof[0], PC_pt,w);
 
+	
         }
 
         //calculate common variables
@@ -189,6 +190,7 @@ std::vector<CommonVars> CVs = GetCommonVars(s,false);
                        // FillTH2(id_xywideCPCHist, CVs[i].x, CVs[i].y, w);
 			FillTH1(id_r25CHist , CVs[i].radius,w);
 			FillTH1(id_etaCutHist, CVs[i].etaphys, w);
+			
                 }
 
         }
@@ -199,11 +201,13 @@ std::vector<CommonVars> CVs = GetCommonVars(s,false);
         hgn_pc HGN = pc_disambiguation(s,cutmask);
         std::vector<bool> HGNmask(numberOfPC,false);
 	double cutdL = 0.5;
-	std::map<int, std::pair<int, double> > pcMatchColl = getPCMatchingColl(s,cutdL); // get matches for eff numerator
-        FillTH1( id_numHGNPCHist, HGN.vsel.size(), w);
+	//std::map<int, std::pair<int, double> > pcMatchColl = getPCMatchingColl(s,cutdL); // get matches for eff numerator
+        std::map<int, std::vector<double> > pcMatchColl = getPCMatchingColl(s,cutdL);
+	FillTH1( id_numHGNPCHist, HGN.vsel.size(), w);
         int cidx;
 	double ptp;
-	std::pair<int,double> match_criteria;
+	//std::pair<int,double> match_criteria;
+	std::vector<double>  match_criteria;
 
 	int leadfound,subfound,leadlost,sublost,leadqual,subqual;
         for(int i=0; i<HGN.vsel.size(); i++){
@@ -225,6 +229,7 @@ std::vector<CommonVars> CVs = GetCommonVars(s,false);
 		FillTH2(id_r_rerr, CVs[cidx].rerr, CVs[cidx].radius,w);
 
 	
+		FillTH2(id_reta_pc, CVs[cidx].etaphys, CVs[cidx].radius, w);
 
 		if(CVs[cidx].radius < 8)
 		FillTH1( id_sumtksum_rlo, sum_sumtkw, w);
@@ -233,15 +238,20 @@ std::vector<CommonVars> CVs = GetCommonVars(s,false);
 		FillTH1( id_sumtksum_rhi, sum_sumtkw, w);
 
 		match_criteria = pcMatchColl[cidx];
-		FillTH1(id_matchdR, match_criteria.second, w);
+		FillTH1(id_matchdR, match_criteria.at(1), w);
 
 		
-		if(match_criteria.first ==0 && match_criteria.second < cutdL){
-			FillTH1(id_eRnum, CVs[cidx].radius, w);
-			FillTH1(id_eRnum_b2p5, CVs[cidx].radius, w);
+		if(match_criteria.at(0) ==0 && match_criteria.at(1) < cutdL){
+			//FillTH1(id_eRnum, CVs[cidx].radius, w);
+			//FillTH1(id_eRnum_b2p5, CVs[cidx].radius, w);
+			FillTH1(id_eRnum, match_criteria.at(2), w);
+			FillTH1(id_eRnum_b2p5, match_criteria.at(2), w);
                 	FillTH1(id_ePtnum,CVs[cidx].pt,w);
                 	FillTH1(id_etksumnum, sum_sumtkw, w);
-			FillTH2(id_effptr_num,CVs[cidx].radius, CVs[cidx].pt, w);
+			FillTH2(id_effptr_num,match_criteria.at(2), CVs[cidx].pt, w);
+			
+			
+			FillTH2(id_reta_effN, GetSimGfromTID(s,match_criteria.at(3) ).eta_physics , match_criteria.at(2), w);
 
 
 			//PC_vTrack0_pt	
@@ -271,7 +281,7 @@ std::vector<CommonVars> CVs = GetCommonVars(s,false);
 			FillTH2(id_pt_shared, PC_nSharedHits[cidx], CVs[cidx].pt, w); 
 			//
 		}
-		if(match_criteria.first !=0 || match_criteria.second >= cutdL){
+		if(match_criteria.at(0) !=0 || match_criteria.at(1) >= cutdL){
 			//fill bg eff radial stuff
 			FillTH1(id_eRnumf, CVs[cidx].radius, w);
                         FillTH1(id_eRnumf_b2p5, CVs[cidx].radius, w);
@@ -399,6 +409,8 @@ std::vector<CommonVars> CVs = GetCommonVars(s,false);
 			FillTH1(id_ePtden,gpt,w);
 			FillTH1(id_etksumden, sum_sumtkw, w);
 			FillTH2(id_effptr_den,simr, gpt, w);
+
+			FillTH2(id_reta_effD, geta, simr, w);
 //		}
 		}//end mask4 check	
 	}
@@ -408,7 +420,7 @@ std::vector<CommonVars> CVs = GetCommonVars(s,false);
 	std::pair<std::vector<double>, std::vector<double> > g_endpoints{};
 	double Sx,Sy,Sz,Ex,Ey,Ez;
 	double Rorigin,Rfinal,Rdrift, xdrift, ydrift, tdrift;
-
+	double g_eta_physics;
 	//create upper bin edge vector
 	std::vector<double> rbinedge{};
 	std::vector<double> rbincenter{};
@@ -468,11 +480,12 @@ std::vector<CommonVars> CVs = GetCommonVars(s,false);
 		//std::cout<<"photon Rfinal="<<Rfinal<<" Rdrift="<<Rdrift<<std::endl;
 		//if Rdrift is less than conversion point, then we drifted out of z .. so set rfinal=rdrift
 		if( Rdrift < Rfinal ) Rfinal = Rdrift;
-
+	 	g_eta_physics = SimTrk_eta.At( gidxlist[i] );	
 		//fill every bin up to the point of conversion or drift	
 		for(int j=0; j<rbinedge.size(); j++){
 			if( Rfinal >= rbinedge.at(j) ){
-				FillTH1(id_gflux, rbincenter.at(j) , w);		
+				FillTH1(id_gflux, rbincenter.at(j) , w);
+				FillTH2(id_reta_ng, g_eta_physics, rbincenter.at(j), w);		
 			}	
 			else{
 				break;

@@ -318,7 +318,37 @@ hgn_pc pc_disambiguation(recosim& s, std::vector<bool> cutmask){
 /////////////////////////////////////////////////////////////////////////////////////////////
 //(2) sim identification
 //
+struct sim_photon{
+//	double px;
+//	double py;
+//	double pz;'
+	double pt;
+	double eta_physics;
+	double phi;
+	
+};
+sim_photon GetSimGfromTID(recosim& s, int tid){
+	sim_photon SG;
+	auto& SimTrk_trackId = s.SimTrk_trackId;
+	auto& SimTrk_eta = s.SimTrk_eta;
+	auto& SimTrk_phi = s.SimTrk_phi;
+	auto& SimTrk_pt = s.SimTrk_pt;
+	SG.pt=0.;
+	SG.eta_physics=0.;
+	SG.phi=0.;
+	for(int i=0; i<SimTrk_trackId.GetSize(); i++){
+		if(SimTrk_trackId.At(i) == tid){
+			SG.pt = SimTrk_pt.At(i);
+			SG.eta_physics = SimTrk_eta.At(i);
+			SG.phi = SimTrk_phi.At(i);
+			return SG;
+		}
+	} 
 
+	return SG;
+		
+
+}
 struct sim_pc{
 	
 	std::vector<int> sim_mask;
@@ -970,14 +1000,18 @@ std::vector<std::pair<int,int> > getGParentColl(recosim& s){
 
 }
 //std::vector<std::pair<int,double> > getPCMatchingColl(recosim& s, double cutdL){ //try to match all reco pc
-std::map<int, std::pair<int,double> > getPCMatchingColl(recosim& s, double cutdL){
+//std::map<int, std::pair<int,double> > getPCMatchingColl(recosim& s, double cutdL){
+std::map<int, std::vector<double> > getPCMatchingColl(recosim& s, double cutdL){
 //mindL is the minimum to be matched
 //loop svtx , label all reco convs
 //0= matched , nearest dR
 //1= NI , nearest dR
 //2= unmatched, nearest dR
 //
-	std::map< int, std::pair<int,double> > pcmap{};
+///
+//the vector elements are (match flag, dL, simR .... sim parent track id)
+	//std::map< int, std::pair<int,double> > pcmap{};
+	std::map<int, std::vector<double> > pcmap{};
 	auto& SimVtx_processType = s.SimVtx_processType;
 	int nSimVtx = (s.SimVtx_processType).GetSize();
 	auto& PC_x = s.Conv_vtx_X;
@@ -987,15 +1021,21 @@ std::map<int, std::pair<int,double> > getPCMatchingColl(recosim& s, double cutdL
 	auto& SimVtx_x = s.SimVtx_x;
     	auto& SimVtx_y = s.SimVtx_y;
     	auto& SimVtx_z = s.SimVtx_z;		
+
+        auto& SimVtx_simtrk_parent_tid = s.SimVtx_simtrk_parent_tid;
+
 		
+
 		double mindL,dL;
 		double matchType;
 		double sx,sy,sz;
 		double cx,cy,cz;
+		double sR;
+		int tid;
 	for(int i=0; i<npc; i++){
 		mindL = 999999;
 		matchType= -1;
-		
+		tid=-1;		
 		cx = PC_x[i];
                 cy = PC_y[i];
                 cz = PC_z[i];
@@ -1009,18 +1049,30 @@ std::map<int, std::pair<int,double> > getPCMatchingColl(recosim& s, double cutdL
 				mindL = dL;
 				if(SimVtx_processType[j] == 14 && mindL < cutdL){
 					 matchType=0;
+					 sR = sqrt(sx*sx + sy*sy);
+					 tid = SimVtx_simtrk_parent_tid[j];
 				}
 				else if(SimVtx_processType[j] != 14 && mindL < cutdL){
 					 matchType=1;
+					sR = sqrt(sx*sx + sy*sy);
+					tid = SimVtx_simtrk_parent_tid[j];
 				}else{
 					matchType =2;
+					sR=-1.;
+					tid=-1;
+
 				}
 				
 			}// end dL check
 		}//end simvtx loop
-		std::pair<int,double> pcmatch{};
-		pcmatch.first = matchType;
-		pcmatch.second = mindL;
+		//std::pair<int,double> pcmatch{};
+		std::vector<double> pcmatch(4);
+		//pcmatch.first = matchType;
+		//pcmatch.second = mindL;
+		pcmatch.at(0) = (double) matchType;
+		pcmatch.at(1) = mindL;
+		pcmatch.at(2) = sR;
+		pcmatch.at(3) = tid;
 		pcmap[i]=pcmatch;
 	}//end npc loop
 

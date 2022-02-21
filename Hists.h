@@ -3,7 +3,7 @@
 void histset::init(){
 //init TH1D
      TH1::SetDefaultSumw2();
-
+    int customNbins = 100;
     TH1Manager.at(id_ptHist) = new MyTH1D("ptHist", "p_{T} Distribution;p_{T};1/p_{T} dN/dp_{T}", 100, 0.0, 20.0);
     TH1Manager.at(id_pzHist) = new MyTH1D("pzHist", "p_{Z} Distribution;p_{Z};dN/dp_{Z}", 100, 0.0, 5.0);
     TH1Manager.at(id_numpcHist) = new MyTH1D("numpcHist", "Number of PC;;Entries per bin", 20,-0.5, 19.5);
@@ -23,7 +23,8 @@ void histset::init(){
     TH1Manager.at(id_r25RHist) = new MyTH1D("r25RHist","r dist (Raw)",250,0,25);
     TH1Manager.at(id_r25CHist) = new MyTH1D("r25CHist","r dist (Cut)",250,0,25);
     TH1Manager.at(id_r25HHist) = new MyTH1D("r25Hist","r dist (HGN)",250,0,25);
-    TH1Manager.at(id_r25Hist_b2p5) = new MyTH1D("r25Hist_b2p5","r dist(2.5mm)",50,0,25);
+    TH1Manager.at(id_r25Hist_b2p5) = new MyTH1D("r25Hist_b2p5","r dist(2.5mm)",customNbins,0,25);
+ //   TH1Manager.at(id_r25Hist_Truth_b2p5) = new MyTH1D("r25Hist_truth","r dist sim truth", customNbins,0,25);
 
     TH1Manager.at(id_PVndof) = new MyTH1D("PVndof","Primary Vertex n.d.o.f, NPV=1",101,-0.5,100.5);
     TH1Manager.at(id_npv) = new MyTH1D("npv","N Primary Vertex",11,-0.5,10.5);
@@ -41,7 +42,8 @@ void histset::init(){
         const Int_t NBINS = 5;
    	Double_t edges[NBINS + 1] = {1.0, 5.0, 9.0, 13.5, 18.0, 25.0}; //custom radial bins 
     TH1Manager.at(id_eRden) = new MyTH1D("eRden","eff R denominator",NBINS,edges);
-    TH1Manager.at(id_eRden_b2p5) = new MyTH1D("eRden_b2p5","eff R denominator b2p5",50,0,25);	
+    TH1Manager.at(id_eRden_b2p5) = new MyTH1D("eRden_b2p5","eff R denominator b2p5",customNbins,0,25);	
+   // TH1Manager.at(id_eRden_true_b2p5) = new MyTH1D("eRden_true_b2p5","eff R denom truth",customNbins,0,25);
     TH1Manager.at(id_ePtden) = new MyTH1D("ePtden","eff Pt denominator",10,0,5);
     TH1Manager.at(id_etksumden) = new MyTH1D("etksumden","eff ntk denominator",12,8,20);
     TH1Manager.at(id_debug1) = new MyTH1D("debug1","debug1",NBINS,edges);
@@ -53,7 +55,8 @@ void histset::init(){
     
 	Double_t edges2[NBINS + 1] = {1.0, 5.0, 9.0, 13.5, 18.0, 25.0};
     TH1Manager.at(id_eRnum) = new MyTH1D("eRnum","eff R numerator",NBINS,edges2);
-    TH1Manager.at(id_eRnum_b2p5) = new MyTH1D("eRnum_b2p5","eff R numerator b2p5",50,0,25);
+    TH1Manager.at(id_eRnum_b2p5) = new MyTH1D("eRnum_b2p5","eff R numerator b2p5",customNbins,0,25);
+ //   TH1Manager.at(id_eRnum_true_b2p5) = new MyTH1D("eRnum_true_b2p5","eff R numerator truth", customNbins,0,25);
     TH1Manager.at(id_ePtnum) = new MyTH1D("ePtnum","eff Pt numerator",10,0,5);
     TH1Manager.at(id_etksumnum) = new MyTH1D("etksumnum","eff ntk numerator",12,8,20);
 
@@ -75,14 +78,53 @@ void histset::init(){
 	TH1Manager.at(id_fluxcomp) = new MyTH1D("fluxcomp","all photon composition",6,-0.5,5.5);
 	//TH1Manager.at(id_rfluxcomp) = new MyTH1D("rfluxcomp","photon r composition",6,-0.6,5.5);
 
-	TH1Manager.at(id_gflux) = new MyTH1D("gflux", "photon r flux per mm",50,0,25);	
+	TH1Manager.at(id_gflux) = new MyTH1D("gflux", "photon r flux per mm",customNbins,0,25);	
 	//TH1Manager.at(id_gflux_b2p5) = new MyTH1D("
+	
+	//TH1Manager.at(id_ginc) = new MyTH1D("ginc", "reco photon incidence"
+//	TH1Manager.at(id_truinc) = new MyTH1D("truinc", "true photon incidence (r-z dip)",30,0,3.14159);
+	
+/*
+	TH1Manager.at(id_s1_pc) = new MyTH1D("s1_pc", "reconstructed conversions in eta segment 1;#eta;NPC",16,-0.8,0.8);
+	TH1Manager.at(id_s2_pc) = new MyTH1D("s2_pc", "reconstructed conversions in eta segment 2;#eta;NPC",16,-0.8,0.8);
+	TH1Manager.at(id_s3_pc) = new MyTH1D("s3_pc", "reconstructed conversions in eta segment 3;#eta;NPC",16,-0.8,0.8);
+	TH1Manager.at(id_s4_pc) = new MyTH1D("s4_pc", "reconstructed conversions in eta segment 4;#eta;NPC",16,-0.8,0.8);
+	TH1Manager.at(id_s5_pc) = new MyTH1D("s5_pc", "reconstructed conversions in eta segment 5;#eta;NPC",16,-0.8,0.8);
+	TH1Manager.at(id_s6_pc) = new MyTH1D("s6_pc", "reconstructed conversions in eta segment 6;#eta;NPC",16,-0.8,0.8);
+
+        TH1Manager.at(id_s1_effN) = new MyTH1D("s1_effN","efficiency numerator in eta segment 1;#eta",16,-0.8,0.8);
+        TH1Manager.at(id_s2_effN) = new MyTH1D("s2_effN","efficiency numerator in eta segment 2;#eta",16,-0.8,0.8);
+        TH1Manager.at(id_s3_effN) = new MyTH1D("s3_effN","efficiency numerator in eta segment 3;#eta",16,-0.8,0.8);
+        TH1Manager.at(id_s4_effN) = new MyTH1D("s4_effN","efficiency numerator in eta segment 4;#eta",16,-0.8,0.8);
+        TH1Manager.at(id_s5_effN) = new MyTH1D("s5_effN","efficiency numerator in eta segment 5;#eta",16,-0.8,0.8);
+        TH1Manager.at(id_s6_effN) = new MyTH1D("s6_effN","efficiency numerator in eta segment 6;#eta",16,-0.8,0.8);
+	
+	TH1Manager.at(id_s1_effD) = new MyTH1D("s1_effD","efficiency numerator in eta segment 1;#eta",16,-0.8,0.8);
+        TH1Manager.at(id_s2_effD) = new MyTH1D("s2_effD","efficiency numerator in eta segment 2;#eta",16,-0.8,0.8);
+        TH1Manager.at(id_s3_effD) = new MyTH1D("s3_effD","efficiency numerator in eta segment 3;#eta",16,-0.8,0.8);
+        TH1Manager.at(id_s4_effD) = new MyTH1D("s4_effD","efficiency numerator in eta segment 4;#eta",16,-0.8,0.8);
+        TH1Manager.at(id_s5_effD) = new MyTH1D("s5_effD","efficiency numerator in eta segment 5;#eta",16,-0.8,0.8);
+        TH1Manager.at(id_s6_effD) = new MyTH1D("s6_effD","efficiency numerator in eta segment 6;#eta",16,-0.8,0.8);
+
+	TH1Manager.at(id_s1_ng) = new MyTH1D("s1_ng", "number of photons in eta segment 1;#eta;N#gamma",16,-0.8,0.8);
+        TH1Manager.at(id_s2_ng) = new MyTH1D("s2_ng", "number of photons in eta segment 2;#eta;N#gamma",16,-0.8,0.8);
+        TH1Manager.at(id_s3_ng) = new MyTH1D("s3_ng", "number of photons in eta segment 3;#eta;N#gamma",16,-0.8,0.8);
+        TH1Manager.at(id_s4_ng) = new MyTH1D("s4_ng", "number of photons in eta segment 4;#eta;N#gamma",16,-0.8,0.8);
+        TH1Manager.at(id_s5_ng) = new MyTH1D("s5_ng", "number of photons in eta segment 5;#eta;N#gamma",16,-0.8,0.8);
+        TH1Manager.at(id_s6_ng) = new MyTH1D("s6_ng", "number of photons in eta segment 6;#eta;N#gamma",16,-0.8,0.8);
+*/
  
 // init TH2D
     TH2Manager.at(id_xyHist) = new MyTH2D("xyHist", "Conversion Vertices per mm^{2} bin; x (cm); y (cm)",200,-10.,10.,200,-10.,10.);
     TH2Manager.at(id_xywideHist) = new MyTH2D("xywideHist", "Conversion Vertices per mm^{2} bin; x (cm); y (cm)",500,-25.,25.,500,-25.,25.);
     TH2Manager.at(id_rphiHist) = new MyTH2D("rphiHist", "Conversion Vertices in R-#phi per mm*60mrad bin; R (cm); #phi",250,0.0,25.0,40,-PI,PI);
   
+    TH2Manager.at(id_reta_pc) = new MyTH2D("reta_pc", "reconstructed conversions r-eta;#eta;R",16,-0.8,0.8,100,0,25);
+    TH2Manager.at(id_reta_effN) = new MyTH2D("reta_effN", "eff numerator r-eta;#eta;R",16,-0.8,0.8,100,0,25);
+    TH2Manager.at(id_reta_effD) = new MyTH2D("reta_effD", "eff denominator r-eta;#eta;R",16,-0.8,0.8,100,0,25);
+    TH2Manager.at(id_reta_ng) = new MyTH2D("reta_ng","number of photons r-eta;#eta;R",16,-0.8,0.8,100,0,25);
+
+
  
     TH2Manager.at(id_ndof_pcReta) = new MyTH2D("ndof_pcReta","ndof and pc raw eta",51,-0.5,50.5,60,-3,3);
     TH2Manager.at(id_ndof_pcRpt) = new MyTH2D("ndof_pcRpt","ndof and pc raw pt",51,-0.5,50.5,50,0,20);
