@@ -312,7 +312,7 @@ std::vector<CommonVars> CVs = GetCommonVars(s,false);
 */
 
 //////////////////////testing masking from early build
-
+	//this simmask controls the cuts on the efficiency numerator
         std::vector<bool> sim_mask4(nSimVtx,false);
 
 //        std::vector<bool> _simmask;
@@ -350,7 +350,8 @@ std::vector<CommonVars> CVs = GetCommonVars(s,false);
 
          //       if( xplus < 0.9 && xplus > 0.1 ) sim_mask3[vidx] = true;
            //     if( std::min(pt0,pt1) > 0.2 ) sim_mask2[vidx] = true;
-                if( std::min(pt0,pt1) > 0.2 && abs(simz) <GV.ZCUT && abs(cos(simthetag))<GV.COSTCUT ) sim_mask4[vidx] = true;
+             //   if( std::min(pt0,pt1) > 0.2 && abs(simz) <GV.ZCUT && abs(cos(simthetag))<GV.COSTCUT ) sim_mask4[vidx] = true;
+		if( abs(simz) <GV.ZCUT && abs(cos(simthetag))<GV.COSTCUT && gpt>0.4 ) sim_mask4[vidx] = true;
 //              if( std::min(pt0,pt1) > 0.2 && abs(simz) <GV.ZCUT && abs(cos(simthetag))<GV.COSTCUT && gpt>3) sim_mask4[vidx] = true;  /////REMember to change (for pt>5 run)   
 
                 //if( _simmask[vidx] == true ){

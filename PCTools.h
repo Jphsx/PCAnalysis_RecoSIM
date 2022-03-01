@@ -488,6 +488,7 @@ struct GlobalValues{
     const double FITPROBCUT = 0.010;
     const double MASSCUT = 0.15;
     const double MINPT = 0.2;
+    const double MINGPT = 0.4;
 
     const double MASS_ELECTRON = 0.5109989461e-3;
     const double MASS_PION = 139.57061e-3;
@@ -1091,7 +1092,10 @@ std::vector<bool> GetCutMask(recosim& s, std::vector<CommonVars> cv ){
 
   std::vector<bool> cutmask(PC_x.GetSize());
   double rerr,z,theta,fitprob,nBefore0,nBefore1;
-  double PT1,PT2;
+ // double PT1,PT2;
+   double gPX,gPY,gPT;
+  //updated min trk pt requirement to reconstructed photon pt
+
   for(int i=0; i<cutmask.size(); i++){
         rerr = cv[i].rerr;
         z = cv[i].z;
@@ -1099,10 +1103,15 @@ std::vector<bool> GetCutMask(recosim& s, std::vector<CommonVars> cv ){
         fitprob = cv[i].pfit;
         nBefore0 = PC_vTrack0_nBefore[i];
         nBefore1 = PC_vTrack1_nBefore[i];
-	PT1 = std::sqrt(cv[i].px0p*cv[i].px0p + cv[i].py0p*cv[i].py0p);
-        PT2 = std::sqrt(cv[i].px1p*cv[i].px1p + cv[i].py1p*cv[i].py1p);
+//	PT1 = std::sqrt(cv[i].px0p*cv[i].px0p + cv[i].py0p*cv[i].py0p);
+//        PT2 = std::sqrt(cv[i].px1p*cv[i].px1p + cv[i].py1p*cv[i].py1p);
+	gPX= cv[i].px0p + cv[i].px1p;
+	gPY= cv[i].py0p + cv[i].py1p;
+	gPT= std::sqrt( gPX*gPX + gPY*gPY );
 //	std::cout<< rerr <<" "<< abs(z)<<" "<<abs(cos(theta))<<" "<<fitprob<<" "<<std::max(nBefore0,nBefore1)<<std::endl;
-        if( rerr < GV.RERRCUT && abs(z) < GV.ZCUT && abs(cos(theta)) < GV.COSTCUT && fitprob > GV.FITPROBCUT && std::max(nBefore0,nBefore1)==0 && PT1 > GV.MINPT && PT2 > GV.MINPT){
+//        if( rerr < GV.RERRCUT && abs(z) < GV.ZCUT && abs(cos(theta)) < GV.COSTCUT && fitprob > GV.FITPROBCUT && std::max(nBefore0,nBefore1)==0 && PT1 > GV.MINPT && PT2 > GV.MINPT){
+        if( rerr < GV.RERRCUT && abs(z) < GV.ZCUT && abs(cos(theta)) < GV.COSTCUT && fitprob > GV.FITPROBCUT && std::max(nBefore0,nBefore1)==0 && gPT > GV.MINGPT){
+        
                 cutmask[i] = true;
         }
         else{
