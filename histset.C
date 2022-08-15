@@ -128,7 +128,11 @@ void histset::AnalyzeEntry(recosim& s){
 	
 	FillTH1(id_npv, nPV,w); 
         //if(nPV != 1 || PV_ndof[0] > 50) return;
-        
+       
+//	if(nPV==0) return;
+//	if(nPV>0 && abs( PV_Z[0] ) > 1) return;
+
+ 
 	if(nPV == 1)
         FillTH1(id_PVndof, PV_ndof[0],w);			
 	
@@ -219,15 +223,22 @@ std::vector<CommonVars> CVs = GetCommonVars(s,false);
          //       FillTH2( id_xywideHGNPCHist, CVs[cidx].x, CVs[cidx].y, w);
         	FillTH1(id_r25HHist , CVs[cidx].radius,w);
 		FillTH1(id_r25Hist_b2p5, CVs[cidx].radius, w);
+		FillTH1(id_r25Hist_b2p5_nowt, CVs[cidx].radius, 1);
 		FillTH1(id_r25coarse, CVs[cidx].radius, w);
 		FillTH1(id_etaHGNHist, CVs[cidx].etaphys,w);
                 FillTH2(id_ndof_pcHeta, PV_ndof[0] ,CVs[cidx].etaphys,w);
                 FillTH2(id_ndof_pcHpt, PV_ndof[0], PC_pt,w);
 
+		FillTH1(id_pc_chi2ndof,Conv_vtx_normalizedChi2[cidx], w); 
+		FillTH2(id_nchi2_r,CVs[cidx].radius,Conv_vtx_normalizedChi2[cidx], w);
+ 		FillTH2(id_nchi2_dr,CVs[cidx].rerr,Conv_vtx_normalizedChi2[cidx],w);
+
+		
 		FillTH1(id_rerrHGNHist,CVs[cidx].rerr ,w);
 		FillTH2(id_pt_rerr, CVs[cidx].rerr, PC_pt,w);
 		FillTH2(id_r_rerr, CVs[cidx].rerr, CVs[cidx].radius,w);
 
+		FillTH2(id_r_phi_p6, CVs[cidx].radius, CVs[cidx].phi , w);
 	
 		FillTH2(id_reta_pc, CVs[cidx].etaphys, CVs[cidx].radius, w);
 
@@ -245,14 +256,18 @@ std::vector<CommonVars> CVs = GetCommonVars(s,false);
 			//FillTH1(id_eRnum, CVs[cidx].radius, w);
 			//FillTH1(id_eRnum_b2p5, CVs[cidx].radius, w);
 			FillTH1(id_eRnum, match_criteria.at(2), w);
+			FillTH1(id_eRnum_nowt, match_criteria.at(2), 1);
 			FillTH1(id_eRnum_b2p5, match_criteria.at(2), w);
+			FillTH1(id_eRnum_b2p5_nowt, match_criteria.at(2), 1);
                 	FillTH1(id_ePtnum,CVs[cidx].pt,w);
                 	FillTH1(id_etksumnum, sum_sumtkw, w);
 			FillTH2(id_effptr_num,match_criteria.at(2), CVs[cidx].pt, w);
-			
+			FillTH2(id_effptr_num_nowt, match_criteria.at(2), CVs[cidx].pt, 1);
+			FillTH2(id_effrphiN, match_criteria.at(2), CVs[cidx].phi, w);	
+			FillTH2(id_effrphiN_nowt, match_criteria.at(2), CVs[cidx].phi, 1);		
 			
 			FillTH2(id_reta_effN, GetSimGfromTID(s,match_criteria.at(3) ).eta_physics , match_criteria.at(2), w);
-
+			FillTH2(id_reta_effN_nowt, GetSimGfromTID(s,match_criteria.at(3) ).eta_physics , match_criteria.at(2), 1);
 
 			//PC_vTrack0_pt	
 			if(PC_vTrack0_pt[cidx] >= PC_vTrack1_pt[cidx]){
@@ -320,7 +335,7 @@ std::vector<CommonVars> CVs = GetCommonVars(s,false);
 
 	 double gpt,gpz,geta, tpt1,tpt2, costg, zpos;
 	 int gidx,t1idx,t2idx;
-	 double simr, sx,sy;
+	 double simr, sx,sy,simphi;
 	int vidx,t0idx;
 	double pt0,pt1,q0,simz, simthetag;
         //vidx is index of pc on simvtx
@@ -350,10 +365,12 @@ std::vector<CommonVars> CVs = GetCommonVars(s,false);
 
          //       if( xplus < 0.9 && xplus > 0.1 ) sim_mask3[vidx] = true;
            //     if( std::min(pt0,pt1) > 0.2 ) sim_mask2[vidx] = true;
-                if( std::min(pt0,pt1) > 0.2 && abs(simz) <GV.ZCUT && abs(cos(simthetag))<GV.COSTCUT ) sim_mask4[vidx] = true;
+                //if( std::min(pt0,pt1) > 0.2 && abs(simz) <GV.ZCUT && abs(cos(simthetag))<GV.COSTCUT ) sim_mask4[vidx] = true;
 //              if( std::min(pt0,pt1) > 0.2 && abs(simz) <GV.ZCUT && abs(cos(simthetag))<GV.COSTCUT && gpt>3) sim_mask4[vidx] = true;  /////REMember to change (for pt>5 run)   
-
-                //if( _simmask[vidx] == true ){
+//		if( abs(simz) <GV.ZCUT && abs(cos(simthetag))<GV.COSTCUT && gpt>0.4  && abs(SimTrk_eta[gidx]) < 0.1  ) sim_mask4[vidx] = true;// changing this for graham
+		if( abs(simz) <GV.ZCUT && abs(cos(simthetag))<GV.COSTCUT && gpt>0.4 && abs(SimTrk_eta[gidx]) < 0.1 ) sim_mask4[vidx] = true;
+	//	if( abs(simz) <GV.ZCUT && abs(cos(simthetag))<GV.COSTCUT && gpt>1.0 && abs(SimTrk_eta[gidx]) < 0.1 ) sim_mask4[vidx] = true;          
+      //if( _simmask[vidx] == true ){
                 //    FillTH1(id_ptden1, gpt, w);
                 //    FillTH1(id_xpden1, xplus, w);
                 //    FillTH1(id_minTkden1, std::min(pt0,pt1), w)
@@ -371,6 +388,7 @@ std::vector<CommonVars> CVs = GetCommonVars(s,false);
 //	double gpt,gpz,geta, tpt1,tpt2, costg, zpos;
 //	int gidx,t1idx,t2idx;
 //	double simr, sx,sy;
+	double simE;
 	for(int i=0; i<nSimVtx; i++){
 		//debug section
 		if(SimVtx_processType[i] == 14){
@@ -396,21 +414,34 @@ std::vector<CommonVars> CVs = GetCommonVars(s,false);
 		geta = SimTrk_eta[gidx];
 		gpz = gpt*sinh(geta);
 		costg = cos( atan2(gpt,gpz) );
+		simE = gpt*cosh(geta);
 
 		zpos = SimVtx_z[i];
 		sx = SimVtx_x[i];
 		sy = SimVtx_y[i];
-		simr = sqrt(sx*sx + sy*sy);	
+		simr = sqrt(sx*sx + sy*sy);
+		
 
+		simphi=	atan2(sy,sx);
+		if (simphi < 0) { simphi += 2 * M_PI; }
 		//does it pass cuts? Require R<25 -- currently looking at context central bpix only
 	//	if( abs(zpos) < GV.ZCUT && abs(costg) < GV.COSTCUT && tpt1 > GV.MINPT && tpt2 > GV.MINPT && simr<25  ){
 			FillTH1(id_eRden, simr, w);
 			FillTH1(id_eRden_b2p5, simr, w);
+			FillTH1(id_eRden_nowt, simr, 1);
+			FillTH1(id_eRden_b2p5_nowt, simr, 1);
 			FillTH1(id_ePtden,gpt,w);
 			FillTH1(id_etksumden, sum_sumtkw, w);
 			FillTH2(id_effptr_den,simr, gpt, w);
+			FillTH2(id_effptr_den_nowt,simr,gpt,1);
+			FillTH2(id_effER_den, simr, simE, w);
+
+			
+			FillTH2(id_effrphiD, simr,simphi,w); 
+			FillTH2(id_effrphiD_nowt, simr,simphi,1);			
 
 			FillTH2(id_reta_effD, geta, simr, w);
+			FillTH2(id_reta_effD_nowt, geta, simr, 1);
 //		}
 		}//end mask4 check	
 	}
@@ -421,6 +452,8 @@ std::vector<CommonVars> CVs = GetCommonVars(s,false);
 	double Sx,Sy,Sz,Ex,Ey,Ez;
 	double Rorigin,Rfinal,Rdrift, xdrift, ydrift, tdrift;
 	double g_eta_physics;
+	//double gpt_forcut;
+	double gE;
 	//create upper bin edge vector
 	std::vector<double> rbinedge{};
 	std::vector<double> rbincenter{};
@@ -480,12 +513,20 @@ std::vector<CommonVars> CVs = GetCommonVars(s,false);
 		//std::cout<<"photon Rfinal="<<Rfinal<<" Rdrift="<<Rdrift<<std::endl;
 		//if Rdrift is less than conversion point, then we drifted out of z .. so set rfinal=rdrift
 		if( Rdrift < Rfinal ) Rfinal = Rdrift;
-	 	g_eta_physics = SimTrk_eta.At( gidxlist[i] );	
-		//fill every bin up to the point of conversion or drift	
+	 	g_eta_physics = SimTrk_eta.At( gidxlist[i] );
+		FillTH1(id_gflux_eta, g_eta_physics, w);
+		if( abs(g_eta_physics) > 0.1 ) continue; //central cut REMOVING Central cut for graham slides
+//		gpt_forcut = SimTrk_pt.At(gidxlist[i] );
+		gE = SimTrk_pt.At(gidxlist[i])*cosh( SimTrk_eta.At(gidxlist[i]) );
+//		if( gpt_forcut < 1.0) continue;	
+			//fill every bin up to the point of conversion or drift	
 		for(int j=0; j<rbinedge.size(); j++){
 			if( Rfinal >= rbinedge.at(j) ){
 				FillTH1(id_gflux, rbincenter.at(j) , w);
-				FillTH2(id_reta_ng, g_eta_physics, rbincenter.at(j), w);		
+				FillTH1(id_gflux_nowt, rbincenter.at(j), 1);
+				
+				FillTH2(id_reta_ng, g_eta_physics, rbincenter.at(j), w);	
+				FillTH2(id_gfluxE, rbincenter.at(j), gE, w);	
 			}	
 			else{
 				break;

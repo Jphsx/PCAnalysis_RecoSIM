@@ -93,7 +93,7 @@
     auto& PC_vTrack0_lost = s.Conv_Tk0_lost;
     auto& PC_vTrack1_lost = s.Conv_Tk1_lost;
 
-
+    auto& Conv_vtx_normalizedChi2 = s.Conv_vtx_normalizedChi2;
 // New variables - April 2020.
     auto& PC_vTrack0_nBefore = s.Conv_nHitsBeforeVtx_Tk0;
     auto& PC_vTrack1_nBefore = s.Conv_nHitsBeforeVtx_Tk1;
