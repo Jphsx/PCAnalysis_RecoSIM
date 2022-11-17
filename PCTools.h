@@ -327,6 +327,7 @@ struct sim_photon{
 	double phi;
 	
 };
+/*
 sim_photon GetSimGfromTID(recosim& s, int tid){
 	sim_photon SG;
 	auto& SimTrk_trackId = s.SimTrk_trackId;
@@ -348,7 +349,7 @@ sim_photon GetSimGfromTID(recosim& s, int tid){
 	return SG;
 		
 
-}
+}*/
 struct sim_pc{
 	
 	std::vector<int> sim_mask;
@@ -361,7 +362,7 @@ struct sim_pc{
 
 };
 
-
+/*
 //Return struct of sim mask, currently masks process 14 and finds associated e/p pair and returns indices
 sim_pc GetSimPC(recosim& s){
 	sim_pc SPC;
@@ -406,14 +407,14 @@ sim_pc GetSimPC(recosim& s){
 			}
 			//if you find everything stop looping
 			if(numchild == 2 && ptid_idx != -1) break;
-               	/*	if(numchild == 2){
+              //	if(numchild == 2){
                         	vtxmask[i] = true;
                         	vtxc1[i] = childholder[0];
                         	vtxc2[i] = childholder[1];
                         	childholder.clear();
 				
                         	break;
-                	}*/
+                	}//
 			
 		}
 		if(numchild == 2){
@@ -436,7 +437,7 @@ sim_pc GetSimPC(recosim& s){
 	return SPC;
 
 }
-
+*/
 ////////////////////////////////////////////////////////////////////
 //
 //(3) calculation of common variables PER conversion
@@ -697,7 +698,7 @@ std::vector<CommonVars> GetCommonVars(recosim& s, bool isRealData){//pass in boo
     }//end loop over nconvs
 
 return pc_comm;
-}
+}/*
 double getDriftFromPxPyPz( recosim& s, int gidx){
 
 	auto& SimTrk_simvtx_Idx = s.SimTrk_simvtx_Idx;
@@ -732,6 +733,8 @@ double getDriftFromPxPyPz( recosim& s, int gidx){
 	return Rdrift;
 
 }
+*/
+/*
 std::pair<std::vector<double>, std::vector<double> > getGEndpoints(recosim& s, int gidx){
 	//for simtrack photon at gidx origin and endpoints first=(sx,sy,sz) second=(ex,ey,ez)
 	std::vector<double> spoints(3);
@@ -777,6 +780,7 @@ std::pair<std::vector<double>, std::vector<double> > getGEndpoints(recosim& s, i
 	return points;
 	
 }
+*/
 ///////////////////////////////////new photon function
 /*double getPhotonRend(recosim&s, int gidx){
  
@@ -796,7 +800,7 @@ std::pair<std::vector<double>, std::vector<double> > getGEndpoints(recosim& s, i
 
 
 }*/
-std::vector<int> getSimpleGidxList( recosim& s){
+/*std::vector<int> getSimpleGidxList( recosim& s){
 //find all sim photons 
 
 //each element is the idx of the SimTrk that has a pdg of 22 (that passes sim acceptance cuts)
@@ -840,7 +844,8 @@ std::vector<int> getSimpleGidxList( recosim& s){
     return gidxlist;
 
 }
-
+*/
+/*
 std::vector<std::pair<int,int> > getGParentColl(recosim& s){
 //first photon sim track idx
 //second:
@@ -999,10 +1004,10 @@ std::vector<std::pair<int,int> > getGParentColl(recosim& s){
 	
 	return Gcoll;
 
-}
+}*/
 //std::vector<std::pair<int,double> > getPCMatchingColl(recosim& s, double cutdL){ //try to match all reco pc
 //std::map<int, std::pair<int,double> > getPCMatchingColl(recosim& s, double cutdL){
-std::map<int, std::vector<double> > getPCMatchingColl(recosim& s, double cutdL){
+/*std::map<int, std::vector<double> > getPCMatchingColl(recosim& s, double cutdL){
 //mindL is the minimum to be matched
 //loop svtx , label all reco convs
 //0= matched , nearest dR
@@ -1079,7 +1084,7 @@ std::map<int, std::vector<double> > getPCMatchingColl(recosim& s, double cutdL){
 
 	return pcmap;
 
-}
+}*/
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //(0) create cutmask

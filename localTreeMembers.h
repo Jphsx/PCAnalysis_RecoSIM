@@ -6,9 +6,6 @@
 
 // Here we retain the old variable names as far as possible to minimize required changes
 
-//	auto w_pvndof0_BC = *(s.w_pvndof0_BC);	
-	auto w_pvtk_BC = *(s.w_pvtk_BC);
-
 	auto& PC_x = s.Conv_vtx_X;
 	auto& PC_y = s.Conv_vtx_Y;
 	auto& PC_z = s.Conv_vtx_Z;
@@ -21,12 +18,14 @@
 	auto& PC_vtx_sigmazz = s.Conv_vtx_cov_22;
 
 	auto numberOfPC = *(s.nConv);
+//	auto numberOfPV = *(s.nPV);
 	auto nPV = *(s.nPV);
-	auto& PV_X = s.PV_X;
-	auto& PV_Y = s.PV_Y;
-	auto& PV_Z = s.PV_Z;
-	auto& PV_ndof = s.PV_ndof;
-	auto& PV_chi2 = s.PV_chi2;
+        auto& PV_X = s.PV_X;
+        auto& PV_Y = s.PV_Y;
+        auto& PV_Z = s.PV_Z;
+        auto& PV_ndof = s.PV_ndof;
+        auto& PV_chi2 = s.PV_chi2;
+	auto nPV_mask = *(s.nPV_mask);
 
 	auto& PC_vTrack0_pt = s.Conv_Tk0_pt;
 	auto& PC_vTrack0_phi = s.Conv_Tk0_phi;
@@ -67,7 +66,9 @@
 //    auto isRealData = *(s.isRealData);
 //    bool isRealData = true;
 
-    auto lumiSection = *(s.luminosityBlock);
+//    auto lumiSection = *(s.luminosityBlock);
+     //auto lumiBlock = *(s.lumiBlock);
+    //auto ilumi_del = *(s.ilumi_del);
 //    auto& mcpu = s.MC_PUInfo_numberOfInteractions; 
     auto runNumber = *(s.run);
     auto eventNumber = *(s.event);
@@ -84,31 +85,23 @@
     auto& PC_vTrack0_charge = s.Conv_Tk0_charge;
     auto& PC_vTrack1_charge = s.Conv_Tk1_charge;
 
-    auto& PC_vTrack0_quality = s.Conv_Tk0_quality;
-    auto& PC_vTrack1_quality = s.Conv_Tk1_quality;
-
-    auto& PC_vTrack0_found = s.Conv_Tk0_found;
-    auto& PC_vTrack1_found = s.Conv_Tk1_found;
-
-    auto& PC_vTrack0_lost = s.Conv_Tk0_lost;
-    auto& PC_vTrack1_lost = s.Conv_Tk1_lost;
-
-
 // New variables - April 2020.
     auto& PC_vTrack0_nBefore = s.Conv_nHitsBeforeVtx_Tk0;
     auto& PC_vTrack1_nBefore = s.Conv_nHitsBeforeVtx_Tk1;
     auto& PC_nSharedHits = s.Conv_nSharedHits;
 
-    auto& SimVtx_processType = s.SimVtx_processType;
+/*    auto& SimVtx_processType = s.SimVtx_processType;
     auto& SimTrk_simvtx_Idx = s.SimTrk_simvtx_Idx;
     auto& SimVtx_simtrk_parent_tid = s.SimVtx_simtrk_parent_tid;
     auto& SimTrk_trackId = s.SimTrk_trackId;
     auto& SimTrk_pt = s.SimTrk_pt;
-    auto& SimTrk_eta = s.SimTrk_eta;
-    auto& SimTrk_phi = s.SimTrk_phi;
-    auto& SimTrk_pdgId = s.SimTrk_pdgId;
+    auto nSimVtx = *(s.nSimVtx);
+
     auto& SimVtx_x = s.SimVtx_x;
     auto& SimVtx_y = s.SimVtx_y;
     auto& SimVtx_z = s.SimVtx_z;
-    auto nSimVtx = *(s.nSimVtx);
-    auto nSimTrk = *(s.nSimTrk);
+    auto& SimTrk_pdgId = s.SimTrk_pdgId;
+    auto& SimTrk_eta = s.SimTrk_eta;
+    auto& Conv_vtxdl = s.Conv_vtxdl;
+    auto& Conv_convVtxIdx = s.Conv_convVtxIdx;
+*/

@@ -25,8 +25,8 @@ int main(int argc, char *argv[])
 
 
 // Original name
-   std::string treestring = "Events";
-
+//   std::string treestring = "Events"; 
+     std::string treestring = "PCNtuple/tree";
    //set nthreads from first input argument
    int nthreads = std::atoi (argv[1]);
    // First enable implicit multi-threading globally, so that the implicit parallelization is on.
